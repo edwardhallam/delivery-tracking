@@ -1,0 +1,138 @@
+id: architecture-docs
+title: Architecture Documentation Suite
+description: 'Produce all Clean Architecture design documents for the Delivery Tracking
+  Web Service. Working inward → outward: Overview → Domain → Application → Infrastructure
+  → Presentation. All requirements read and understood before any document written.'
+tasks:
+  initial-tourist:
+    id: initial-tourist
+    title: ARCH-OVERVIEW — System Architecture Overview
+    description: 'Master architecture document: four Clean Architecture layers, module
+      structure, dependency rule, key design patterns, data flows, cross-cutting concerns,
+      and known gaps (token_version, structure departure).'
+    priority: high
+    completed: true
+    parent_id: null
+    context: ''
+    child_tasks: []
+    created_at: '2026-04-01T12:19:29.691576'
+    updated_at: '2026-04-01T12:19:29.691581'
+    completed_at: '2026-04-01T12:21:47.256069'
+    completion_report: 'ARCH-OVERVIEW.md written to //delivery-tracking/docs/architecture/.
+      Covers: four Clean Architecture layers, canonical module structure (departing
+      from flat requirements layout), dependency rule with concrete examples, application
+      startup sequence, three data flow narratives (polling, API request, auth), cross-cutting
+      concerns (config, logging, error handling, DB sessions), and two documented
+      gaps (token_version column, module structure departure).'
+    completion_signoff_by: Archie
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  index-apropos:
+    id: index-apropos
+    title: ARCH-DOMAIN — Domain Layer Design
+    description: Entities, value objects, repository interfaces (ABCs), and domain
+      exceptions. Zero framework dependencies.
+    priority: high
+    completed: true
+    parent_id: null
+    context: ''
+    child_tasks: []
+    created_at: '2026-04-01T12:19:29.695538'
+    updated_at: '2026-04-01T12:19:29.695540'
+    completed_at: '2026-04-01T12:23:40.643176'
+    completion_report: 'ARCH-DOMAIN.md written. Covers: all five entities with full
+      field specs and key invariants, SemanticStatus and LifecycleGroup value objects
+      with their normalisation functions, three abstract repository interfaces (AbstractDeliveryRepository,
+      AbstractUserRepository, AbstractPollLogRepository) with method signatures and
+      docstrings, domain exceptions, and a domain invariants summary. token_version
+      field included on User entity per GAP-001.'
+    completion_signoff_by: Archie
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  energy-romeo:
+    id: energy-romeo
+    title: ARCH-APPLICATION — Application Layer Design
+    description: Use cases, DTOs, application exceptions. Orchestrates domain logic
+      via repository interfaces. No SQLAlchemy/FastAPI imports.
+    priority: high
+    completed: true
+    parent_id: null
+    context: ''
+    child_tasks: []
+    created_at: '2026-04-01T12:19:29.698628'
+    updated_at: '2026-04-01T12:19:29.698630'
+    completed_at: '2026-04-01T12:26:10.315077'
+    completion_report: 'ARCH-APPLICATION.md written. Covers: layer rules with constructor
+      injection pattern, all DTOs (auth, delivery summary/detail, system/health/carriers,
+      polling internal DTOs), external service interfaces (AbstractParcelAPIClient,
+      AbstractCarrierCache, AbstractSchedulerState), all 8 use cases with full execution
+      logic and dependency graphs, application exceptions with presentation-layer
+      HTTP mapping table, and a testing notes section with priority test scenarios.'
+    completion_signoff_by: Archie
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  buzzer-nylon:
+    id: buzzer-nylon
+    title: ARCH-INFRASTRUCTURE — Infrastructure Layer Design
+    description: SQLAlchemy ORM models, repository implementations, mappers, Parcel
+      API client, APScheduler wiring, carrier cache, database setup.
+    priority: high
+    completed: true
+    parent_id: null
+    context: ''
+    child_tasks: []
+    created_at: '2026-04-01T12:19:29.701881'
+    updated_at: '2026-04-01T12:19:29.701882'
+    completed_at: '2026-04-01T12:28:36.403577'
+    completion_report: 'ARCH-INFRASTRUCTURE.md written. Covers: async SQLAlchemy engine/session
+      factory setup (pool_pre_ping, expire_on_commit), all 5 ORM models with correct
+      constraints and indexes (including token_version on UserORM per GAP-001), mapper
+      pattern, SQLAlchemyDeliveryRepository key implementations (get_snapshot, list_filtered
+      with dynamic query builder, create_event ON CONFLICT DO NOTHING, increment_token_version
+      atomic update), Parcel API client with retry logic and API key security, CarrierCache
+      with stale-serve behaviour, APScheduler registration (max_instances=1, jitter,
+      misfire_grace), poll cycle session management, cold-start pattern, and seed
+      script with validation.'
+    completion_signoff_by: Archie
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  mango-polygon:
+    id: mango-polygon
+    title: ARCH-PRESENTATION — Presentation Layer Design
+    description: FastAPI routers, HTTP schemas, DI providers, middlewares, app factory
+      with lifespan, config (pydantic-settings).
+    priority: high
+    completed: true
+    parent_id: null
+    context: ''
+    child_tasks: []
+    created_at: '2026-04-01T12:19:29.705274'
+    updated_at: '2026-04-01T12:19:29.705275'
+    completed_at: '2026-04-01T12:31:00.254528'
+    completion_report: 'ARCH-PRESENTATION.md written. Covers: pydantic-settings Settings
+      class with all validators (JWT key length, TTL ranges, bcrypt rounds, HTTPS/cookie
+      consistency), app factory with full lifespan (startup order, cold-start poll,
+      graceful shutdown), all HTTP schemas (auth, delivery, system), JWT creation
+      and 6-step validation dependency, DI providers wiring all use cases to infrastructure,
+      all three routers (auth, deliveries, system) with exception mapping, security
+      headers middleware, in-memory rate limiter with sliding window and Retry-After
+      header, exception handlers (validation + generic catch-all), and a testing strategy
+      using dependency_overrides.'
+    completion_signoff_by: Archie
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+lessons_learned: []
+root_tasks:
+- initial-tourist
+- index-apropos
+- energy-romeo
+- buzzer-nylon
+- mango-polygon
+created_at: '2026-04-01T12:19:11.662449'
+updated_at: '2026-04-01T12:31:00.255957'
+current_task_id: null

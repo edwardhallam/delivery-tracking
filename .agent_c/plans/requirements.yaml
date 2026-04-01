@@ -1,0 +1,383 @@
+id: requirements
+title: Delivery Tracking Service — Requirements Definition
+description: 'Define comprehensive, implementation-ready requirements for a greenfield
+  Delivery Tracking Web Service that wraps the Parcel App API.
+
+
+  ## Goals
+
+  - Poll Parcel API every 15 minutes for active deliveries
+
+  - Normalize status codes into human-readable semantic states
+
+  - Expose a REST API for a web dashboard consumer
+
+  - Web dashboard: lists deliveries with sender, status, expected delivery date
+
+  - Single-user credential-based access (username + password)
+
+  - Full persistent history retained for all deliveries
+
+  - Docker self-hosted deployment
+
+
+  ## Inputs
+
+  - Parcel API Reference: //delivery-tracking/api-reference.md
+
+  - Original API Docs: //delivery-tracking/parcel-api-view-deliveries.md
+
+  - User scoping answers: No notifications, single tenant, dashboard consumer, Docker,
+  full history, 15-min polling
+
+
+  ## Output
+
+  - Comprehensive requirements document at //delivery-tracking/docs/requirements/
+
+  - Data model specification
+
+  - REST API specification
+
+  - Deployment specification'
+tasks:
+  libra-prefix:
+    id: libra-prefix
+    title: Phase 1 — Architecture & Tech Stack Selection
+    description: Define and document the system architecture, selected technology
+      stack, and component breakdown. This forms the structural backbone all other
+      requirements are written against.
+    priority: high
+    completed: true
+    parent_id: null
+    context: 'IN PROGRESS. Writing architecture decision record and component diagram.
+      Tech stack selected: Python/FastAPI backend + APScheduler, PostgreSQL, React/Vite
+      frontend, Nginx reverse proxy, Docker Compose.'
+    child_tasks: []
+    created_at: '2026-04-01T10:48:17.568432'
+    updated_at: '2026-04-01T10:49:16.112946'
+    completed_at: '2026-04-01T10:51:06.047237'
+    completion_report: 'Delivered architecture decision record at //delivery-tracking/docs/requirements/01-architecture.md.
+      Stack: Python 3.12/FastAPI, PostgreSQL 16, React 18/Vite/TypeScript, Nginx,
+      Docker Compose v2. 6 ADRs documented with rationale, component diagram, env
+      var schema, repo structure, data flow diagrams.'
+    completion_signoff_by: Rita
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  shelter-april:
+    id: shelter-april
+    title: Phase 2 — Data Model Requirements
+    description: 'Define all persistent data entities: deliveries, events, status
+      history, and user credentials. Include field-level constraints, relationships,
+      and indexing strategy.'
+    priority: high
+    completed: true
+    parent_id: null
+    context: 'Inputs: Parcel API Delivery and Event schemas from api-reference.md,
+      full history retention requirement.
+
+      Deliverable: //delivery-tracking/docs/requirements/02-data-model.md with entity
+      diagrams (Mermaid ERD), field specs, constraints, and migration strategy notes.
+
+      Key entities: Delivery, DeliveryEvent, StatusHistory, User.
+
+      Must capture: carrier_code enrichment, timezone-ambiguous date fields, status
+      code→enum mapping.'
+    child_tasks: []
+    created_at: '2026-04-01T10:48:23.670047'
+    updated_at: '2026-04-01T10:48:23.670050'
+    completed_at: '2026-04-01T10:54:11.129478'
+    completion_report: 'Delivered data model requirements at //delivery-tracking/docs/requirements/02-data-model.md.
+
+
+      Five entities defined: Delivery (core package entity with upsert-on-tracking-number+carrier-code),
+      DeliveryEvent (append-only event log with deduplication fingerprint), StatusHistory
+      (immutable status change audit log), User (single-user credentials with bcrypt),
+      PollLog (operational polling history). Full field specs, types, nullability,
+      constraints, and 26 business rules documented. Mermaid ERD included. Status
+      code → SemanticStatus mapping table with lifecycle groupings (Active/Attention/Terminal).
+      Date/timezone handling strategy documented (raw strings stored verbatim, epoch
+      timestamps preferred for sorting). Alembic migration strategy with startup sequence.
+      Carrier code enrichment decision: client-side, not stored in DB.'
+    completion_signoff_by: Rita
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  spark-forget:
+    id: spark-forget
+    title: Phase 3 — Polling Service Requirements
+    description: 'Define requirements for the background polling subsystem: scheduling,
+      rate limit compliance, change detection, error handling, and retry logic.'
+    priority: high
+    completed: true
+    parent_id: null
+    context: 'Inputs: Parcel API rate limit (20 req/hr), polling interval (15 min),
+      single Parcel API key, full history retention.
+
+      Deliverable: //delivery-tracking/docs/requirements/03-polling-service.md
+
+      Key areas: scheduler setup, API key management, diff/change-detection algorithm,
+      status transition detection, error + retry strategy, startup behaviour (cold
+      start).'
+    child_tasks: []
+    created_at: '2026-04-01T10:48:31.529689'
+    updated_at: '2026-04-01T10:48:31.529693'
+    completed_at: '2026-04-01T11:03:29.463537'
+    completion_report: 'Delivered polling service requirements at //delivery-tracking/docs/requirements/03-polling-service.md.
+      36 requirements defined (POLL-REQ-001 through POLL-REQ-036) covering: APScheduler
+      setup with 15-min interval + ±30s jitter + max_instances=1 overlap guard; cold-start
+      immediate poll on every app start; API key management (env var only, never logged);
+      filter_mode=recent rationale; pre-poll DB snapshot strategy (avoids N+1 queries);
+      change detection algorithm (new vs existing, status diff, event deduplication
+      via ON CONFLICT DO NOTHING); per-delivery transaction boundaries with partial
+      failure handling; 4-tier error classification with retry strategy (exponential
+      backoff: 15s/60s/120s, max 3 attempts); rate limit and auth failure handling;
+      structured logging requirements with poll_id correlation; health/observability
+      indicators including consecutive_errors degraded state; two sequence diagrams
+      (normal cycle + retryable error).'
+    completion_signoff_by: Rita
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  fame-ingrid:
+    id: fame-ingrid
+    title: Phase 4 — Status Normalization Requirements
+    description: 'Define the status normalization layer: mapping Parcel integer codes
+      to semantic enums, human-readable labels, grouping into lifecycle phases, and
+      transition validation.'
+    priority: medium
+    completed: true
+    parent_id: null
+    context: 'Inputs: Parcel status codes 0–8 from api-reference.md.
+
+      Deliverable: //delivery-tracking/docs/requirements/04-status-normalization.md
+
+      Must define: SemanticStatus enum, display labels, lifecycle groupings (terminal/active/attention),
+      valid transition matrix, how normalized status is stored vs derived.'
+    child_tasks: []
+    created_at: '2026-04-01T10:48:36.875186'
+    updated_at: '2026-04-01T10:48:36.875190'
+    completed_at: '2026-04-01T11:04:48.645342'
+    completion_report: 'Delivered status normalization requirements at //delivery-tracking/docs/requirements/04-status-normalization.md.
+      14 requirements defined (NORM-REQ-001 through NORM-REQ-014) covering: SemanticStatus
+      enum (10 values including UNKNOWN sentinel), Parcel code→SemanticStatus mapping
+      table, LifecycleGroup enum (ACTIVE/ATTENTION/TERMINAL) with membership, full
+      status transition matrix with anomalous/terminal transition handling policy
+      (persist all, log warnings, never reject), storage model (both raw code and
+      semantic stored, lifecycle derived only), normalization function specification
+      with never-raise contract, 100% branch coverage requirement, and complete frontend
+      TypeScript representation with display labels and badge colour strategy.'
+    completion_signoff_by: Rita
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  left-milk:
+    id: left-milk
+    title: Phase 5 — REST API Requirements
+    description: 'Define all REST API endpoints exposed by the service: resources,
+      HTTP methods, request/response schemas, auth requirements, pagination, filtering,
+      and error formats.'
+    priority: high
+    completed: true
+    parent_id: null
+    context: 'Inputs: data model (Phase 2), web dashboard requirements (upcoming deliveries,
+      sender, status, expected date).
+
+      Deliverable: //delivery-tracking/docs/requirements/05-rest-api.md with endpoint
+      catalogue, request/response schemas, OpenAPI-style definitions, auth patterns,
+      error schema.
+
+      Key endpoints: list deliveries, get delivery detail (with event history), auth
+      endpoints.'
+    child_tasks: []
+    created_at: '2026-04-01T10:48:42.236622'
+    updated_at: '2026-04-01T10:48:42.236626'
+    completed_at: '2026-04-01T11:16:57.925987'
+    completion_report: 'Delivered REST API requirements at //delivery-tracking/docs/requirements/05-rest-api.md.
+      28 requirements defined (API-REQ-001 through API-REQ-028) covering: 7 endpoints
+      (POST /auth/login, POST /auth/refresh, POST /auth/logout, GET /deliveries, GET
+      /deliveries/{id}, GET /health, GET /carriers); JWT auth with token_version invalidation
+      strategy; standard error envelope with SCREAMING_SNAKE_CASE codes; delivery
+      list filtering (lifecycle_group, semantic_status, carrier_code, search, include_terminal),
+      sorting (6 fields, NULLs-last for timestamp_expected), offset pagination (max
+      page_size 100); full detail endpoint with events + status_history (no pagination);
+      health endpoint with 3-tier status (healthy/degraded/unhealthy) and next_poll_at;
+      carrier cache with stale-serving strategy; security requirements (no wildcard
+      CORS, security headers, /docs disabled in prod, no stack traces in 500s); data
+      model addition noted (token_version column on users).'
+    completion_signoff_by: Rita
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  logic-random:
+    id: logic-random
+    title: Phase 6 — Web Dashboard Requirements
+    description: 'Define the web dashboard UI requirements: views, data displayed
+      per delivery, interactions, filter/sort options, and how it connects to the
+      REST API.'
+    priority: medium
+    completed: true
+    parent_id: null
+    context: 'Inputs: User requirement (upcoming deliveries, sender, status, expected
+      delivery date), single-user credential login.
+
+      Deliverable: //delivery-tracking/docs/requirements/06-web-dashboard.md
+
+      Must cover: login page, delivery list view (columns, sort, filter), delivery
+      detail view, status indicators, refresh behaviour, session management.'
+    child_tasks: []
+    created_at: '2026-04-01T10:48:47.124972'
+    updated_at: '2026-04-01T10:48:47.124975'
+    completed_at: '2026-04-01T11:22:32.540194'
+    completion_report: 'Delivered web dashboard requirements at //delivery-tracking/docs/requirements/06-web-dashboard.md.
+      60 requirements defined (DASH-REQ-001 through DASH-REQ-060) covering: tech stack
+      (React 18 + TypeScript + Vite + TanStack Query + Tailwind + shadcn/ui); 5 routes
+      with auth guards and redirect preservation; application shell with poll health
+      indicator (60s auto-refresh, 3-tier colour); login page (debounce-free, Enter
+      key support, generic error messages, no username enumeration); delivery list
+      (4 filter tabs with ATTENTION badge count, debounced search, 4 table columns
+      with secondary tracking number, sortable with URL state persistence, expected
+      date display priority rules with timezone-aware relative labels, 5-min auto-refresh,
+      skeleton loading, comprehensive empty states); delivery detail (header card,
+      status history vertical timeline, tracking events log, terminal delivery 30-min
+      refresh extension); status badge component (lifecycle colour + DELIVERED green
+      override + ATTENTION icon); full session management (in-memory token only, silent
+      refresh on load, Axios interceptors for auto-refresh and 401 handling, logout
+      clears query cache); accessibility (labels, sr-only badge text, keyboard navigation,
+      page titles); responsive (card layout below 768px).'
+    completion_signoff_by: Rita
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  hippie-logic:
+    id: hippie-logic
+    title: Phase 7 — Authentication & Security Requirements
+    description: 'Define authentication mechanism for the single user: credential
+      storage, session/token management, API route protection, and basic security
+      hardening.'
+    priority: high
+    completed: true
+    parent_id: null
+    context: 'Inputs: Single-user credential access requirement, Docker self-hosted
+      context.
+
+      Deliverable: //delivery-tracking/docs/requirements/07-auth-security.md
+
+      Must cover: password hashing, JWT or session tokens, token expiry, protected
+      routes, CORS policy, HTTPS considerations for self-hosted.'
+    child_tasks: []
+    created_at: '2026-04-01T10:48:52.306675'
+    updated_at: '2026-04-01T10:48:52.306680'
+    completed_at: '2026-04-01T11:26:06.070818'
+    completion_report: 'Delivered authentication and security requirements at //delivery-tracking/docs/requirements/07-auth-security.md.
+      61 requirements defined (SEC-REQ-001 through SEC-REQ-061) covering: threat model
+      for self-hosted single-user deployment; bcrypt cost factor ≥12 with passlib,
+      constant-time comparison with dummy verify on unknown username; JWT HS256 with
+      32-char minimum secret, 6-step token validation chain, type-claim confusion
+      prevention; token_version invalidation mechanism (no blocklist needed); refresh
+      token httpOnly cookie with SameSite=Strict scoped to /api/auth; CORS disabled
+      in production (same-origin via Nginx), development-only with specific origins;
+      HTTP security headers (X-Content-Type-Options, X-Frame-Options, CSP with connect-src
+      self); brute force protection (10 failed/15min/IP, memory-based, Retry-After
+      header, only counts failures); optional HTTPS via Nginx with TLS 1.2+ enforcement
+      and HTTP→HTTPS redirect; secrets management (.env.example, startup validation,
+      weak-secrets rejection); Docker hardening (non-root containers, no exposed postgres
+      port, pinned image versions, no secrets in Dockerfiles); SQLAlchemy parameterised
+      queries, Pydantic validation; security audit logging; pre-deployment checklist;
+      out-of-scope items documented.'
+    completion_signoff_by: Rita
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  history-chrome:
+    id: history-chrome
+    title: Phase 8 — Deployment & Configuration Requirements
+    description: Define Docker Compose topology, service configuration, environment
+      variable schema, volume strategy for persistence, health checks, and operational
+      considerations.
+    priority: medium
+    completed: true
+    parent_id: null
+    context: 'Inputs: Docker self-hosted requirement, PostgreSQL persistence, single-user.
+
+      Deliverable: //delivery-tracking/docs/requirements/08-deployment.md
+
+      Must cover: Docker Compose services, image base selections, env vars schema,
+      volume mounts, port exposure, health check endpoints, startup ordering, first-run
+      setup (initial user creation).'
+    child_tasks: []
+    created_at: '2026-04-01T10:48:57.413447'
+    updated_at: '2026-04-01T10:48:57.413453'
+    completed_at: '2026-04-01T11:44:35.486516'
+    completion_report: 'Delivered deployment and configuration requirements at //delivery-tracking/docs/requirements/08-deployment.md.
+      48 requirements defined (DEPLOY-REQ-001 through DEPLOY-REQ-048) covering: 3-service
+      Docker Compose topology (postgres, api, frontend) on shared bridge network;
+      port exposure strategy (only frontend:80 exposed, postgres and api internal-only);
+      health-check-gated startup ordering (api waits for postgres healthy); api Dockerfile
+      (two-stage build, python:3.12-slim, non-root appuser, entrypoint.sh); frontend
+      Dockerfile (multi-stage node:20-alpine builder + nginx:alpine runtime, npm ci,
+      no build tools in final image); postgres volume strategy (named postgres_data
+      volume, local driver, persists across restarts/rebuilds, --volumes required
+      for destruction); entrypoint.sh startup sequence (alembic upgrade head → seed
+      → uvicorn --workers 1 --host 0.0.0.0); idempotent seed script with non-zero
+      exit if DB empty and credentials absent; Nginx config (API proxy to api:8000,
+      SPA try_files fallback, aggressive static asset caching with immutable, X-Real-IP
+      forwarding, optional HTTPS in separate config file); full environment variable
+      schema (all 3 services, 8 categories, required/optional/defaults/ranges); 3-service
+      health checks with appropriate start_periods; log rotation (json-file, 50m/5
+      files); upgrade procedure (rebuild + up -d, auto-migrations); backup/restore
+      via pg_dump; resource minimums (1 core, 512MB, 1GB); .env.example specification
+      with full comments.'
+    completion_signoff_by: Rita
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  monica-galileo:
+    id: monica-galileo
+    title: Phase 9 — Master Requirements Document
+    description: Compile all phase outputs into a single consolidated requirements
+      document with executive summary, traceability table, and open questions log.
+    priority: high
+    completed: true
+    parent_id: null
+    context: 'Inputs: All docs from phases 1–8.
+
+      Deliverable: //delivery-tracking/docs/requirements/00-master-requirements.md
+
+      Must include: executive summary, scope statement, full requirements catalogue
+      with IDs (REQ-XXX), traceability to source (user input / API docs / inferred),
+      open questions/assumptions log.'
+    child_tasks: []
+    created_at: '2026-04-01T10:49:03.073002'
+    updated_at: '2026-04-01T10:49:03.073007'
+    completed_at: '2026-04-01T12:01:45.506439'
+    completion_report: 'Delivered master requirements document at //delivery-tracking/docs/requirements/00-master-requirements.md.
+      Full catalogue of all 283 requirements across 8 domains with priority (M/S/C)
+      and source (UI/API/AR/IN) classifications. Executive summary with technology
+      stack at-a-glance and requirement count table. System context diagram. In/out-of-scope
+      tables. Architecture overview with ADR summary and data flow. Complete requirements
+      catalogue (all 283 entries in compact table form, linked to detail docs). Traceability
+      matrix: source distribution (76% inferred/best-practice, 13% user input, 6%
+      architecture decision, 5% API docs); explicit user-input→requirement mapping;
+      Parcel API constraint→requirement mapping. 10 key assumptions documented with
+      impact analysis. 4 open questions for operator. 8 deferred features with implementation
+      notes.'
+    completion_signoff_by: Rita
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+lessons_learned: []
+root_tasks:
+- libra-prefix
+- shelter-april
+- spark-forget
+- fame-ingrid
+- left-milk
+- logic-random
+- hippie-logic
+- history-chrome
+- monica-galileo
+created_at: '2026-04-01T10:48:07.429213'
+updated_at: '2026-04-01T12:01:45.506938'
+current_task_id: null

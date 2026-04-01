@@ -1,0 +1,6 @@
+includes:
+- //config/tools/workspace/shell_exec/*
+commands:
+  mkdir:
+    always_allowed:
+    - -p *

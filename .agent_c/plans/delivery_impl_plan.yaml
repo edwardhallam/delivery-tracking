@@ -1,0 +1,2168 @@
+id: delivery_impl_plan
+title: Delivery Tracking Service — Implementation Plan
+description: 'Full implementation of the Delivery Tracking Web Service from greenfield
+  to production-ready Docker deployment. Ordered inward → outward following Clean
+  Architecture dependency rules: scaffolding → Domain → Application → Infrastructure
+  → Presentation → Migrations → Configuration → Testing.
+
+
+  ## Source Documents
+
+  - Architecture: //delivery-tracking/docs/architecture/ (ARCH-OVERVIEW, ARCH-DOMAIN,
+  ARCH-APPLICATION, ARCH-INFRASTRUCTURE, ARCH-PRESENTATION)
+
+  - Requirements: //delivery-tracking/docs/requirements/ (00-master through 08-deployment)
+
+  - 283 total requirements, 186 Must Have, 92 Should Have
+
+
+  ## Governing Constraint
+
+  Dependencies flow inward only. Every task must respect this rule. No domain code
+  imports infrastructure; no application code imports FastAPI.
+
+
+  ## Success Criteria
+
+  - `docker compose up -d` starts all three services
+
+  - All Must Have requirements satisfied
+
+  - Domain and Application layers have no framework imports
+
+  - 100% branch coverage on normalize_status() and get_lifecycle_group()
+
+  - JWT 6-step validation chain implemented
+
+  - Cold-start poll fires on first boot'
+tasks:
+  rufus-brother:
+    id: rufus-brother
+    title: Phase 1 — Project Scaffolding
+    description: 'Establish the complete monorepo skeleton: directory tree, dependency
+      manifests, Docker Compose stack, Dockerfiles, entrypoint script, Alembic init,
+      Nginx config, and environment file template. Nothing domain-specific is written
+      here — this phase produces the chassis that every subsequent phase builds into.'
+    priority: high
+    completed: false
+    parent_id: null
+    context: 'Arch refs: ARCH-OVERVIEW §3 (module structure), ARCH-INFRASTRUCTURE
+      §2.3 (Alembic), ARCH-PRESENTATION §3 (lifespan/entrypoint), 08-deployment requirements
+      throughout. ADRs 001–006 are the structural commitments. No application code
+      written in this phase.'
+    child_tasks:
+    - young-point
+    - shine-flower
+    - ultra-history
+    - torso-guide
+    - ocean-miller
+    - cake-queen
+    - politic-outside
+    created_at: '2026-04-01T12:41:26.501607'
+    updated_at: '2026-04-01T12:41:26.501610'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  gabriel-motif:
+    id: gabriel-motif
+    title: Phase 2 — Domain Layer
+    description: 'Implement the innermost Clean Architecture layer: value objects,
+      entities, repository ABCs, and domain exceptions. Zero framework imports permitted.
+      All code in this phase must be independently testable with plain pytest and
+      no database.'
+    priority: high
+    completed: false
+    parent_id: null
+    context: 'Arch refs: ARCH-DOMAIN (entire document). Requirements: DM-BR-001–026,
+      NORM-REQ-001–014, SEC-REQ-007. Key invariant: no SQLAlchemy, FastAPI, httpx,
+      or APScheduler imports anywhere in app/domain/.'
+    child_tasks:
+    - romeo-wizard
+    - orca-garlic
+    - brother-baron
+    - clone-pablo
+    created_at: '2026-04-01T12:41:33.718342'
+    updated_at: '2026-04-01T12:41:33.718346'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  money-joshua:
+    id: money-joshua
+    title: Phase 3 — Application Layer
+    description: Implement all 8 use cases, all DTOs, the external service interfaces
+      (AbstractParcelAPIClient, AbstractCarrierCache, AbstractSchedulerState), and
+      application exceptions. This layer orchestrates domain logic but imports nothing
+      from infrastructure or presentation.
+    priority: high
+    completed: false
+    parent_id: null
+    context: 'Arch refs: ARCH-APPLICATION (entire document). Requirements: POLL-REQ-003–036,
+      API-REQ-001–028, SEC-REQ-007–021, NORM-REQ-003–006. PollAndSyncUseCase is the
+      most complex use case — see ARCH-APPLICATION §4.6 for the 4-phase execution
+      model. Must NOT import sqlalchemy, fastapi, httpx, apscheduler.'
+    child_tasks:
+    - kiwi-rabbit
+    - include-miranda
+    - local-invest
+    - tobacco-engine
+    - limbo-jamaica
+    - burger-casino
+    - pedro-tactic
+    created_at: '2026-04-01T12:41:41.200119'
+    updated_at: '2026-04-01T12:41:41.200123'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  chamber-open:
+    id: chamber-open
+    title: Phase 4 — Infrastructure Layer
+    description: 'Implement all concrete adapters: SQLAlchemy async engine, ORM models
+      (5), domain-ORM mappers (5), repository implementations (3), Parcel API client
+      with retry logic, carrier cache, and APScheduler integration. This is the only
+      layer that imports SQLAlchemy, httpx, and APScheduler.'
+    priority: high
+    completed: false
+    parent_id: null
+    context: 'Arch refs: ARCH-INFRASTRUCTURE (entire document). Requirements: DM-BR-001–026,
+      DM-MIG-001–004, POLL-REQ-007–036, SEC-REQ-001–004, SEC-REQ-021. Critical: ORM
+      models are NOT domain entities — mappers are the only code that crosses this
+      boundary. lazy="raise" on all relationships to prevent N+1. GAP-001: token_version
+      column must be on UserORM even though it''s missing from 02-data-model.md.'
+    child_tasks:
+    - album-time
+    - domino-senior
+    - apple-cloud
+    - nerve-druid
+    - hilton-person
+    - neutral-grid
+    - mango-arnold
+    created_at: '2026-04-01T12:41:49.196912'
+    updated_at: '2026-04-01T12:41:49.196916'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  arizona-culture:
+    id: arizona-culture
+    title: Phase 5 — Presentation Layer
+    description: 'Implement the FastAPI surface: pydantic-settings config, HTTP schemas,
+      JWT creation/validation, DI providers, auth/deliveries/system routers, security
+      headers middleware, rate limiter, exception handlers, and the app factory with
+      full lifespan management. Only layer that imports FastAPI.'
+    priority: high
+    completed: false
+    parent_id: null
+    context: 'Arch refs: ARCH-PRESENTATION (entire document). Requirements: API-REQ-001–028,
+      SEC-REQ-009–040, SEC-REQ-047–048, SEC-REQ-055–061, DEPLOY-REQ-021–024. JWT 6-step
+      validation chain (SEC-REQ-015) is critical correctness requirement. Rate limiter
+      is in-memory sliding window (SEC-REQ-035–040). OpenAPI disabled in production
+      (API-REQ-023). CORS added only in development (SEC-REQ-029–030).'
+    child_tasks:
+    - system-gyro
+    - invent-engine
+    - iris-ethnic
+    - bandit-nothing
+    - blue-charm
+    - shock-gossip
+    - panel-garden
+    created_at: '2026-04-01T12:41:56.629441'
+    updated_at: '2026-04-01T12:41:56.629445'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  budget-deluxe:
+    id: budget-deluxe
+    title: Phase 6 — Database Migrations
+    description: Configure Alembic env.py and write the initial migration revision
+      that creates all five tables with all indexes, constraints, and check constraints.
+      Includes the token_version column on users (GAP-001 from ARCH-OVERVIEW §9) that
+      is missing from 02-data-model.md but required by the auth design.
+    priority: high
+    completed: false
+    parent_id: null
+    context: 'Arch refs: ARCH-INFRASTRUCTURE §2.3, §9. Requirements: DM-MIG-001–004,
+      DM-BR-001–025. Critical additions vs requirements doc: token_version on users,
+      JSONB last_raw_response on deliveries, UNIQUE fingerprint on delivery_events,
+      CHECK constraint on poll_logs.outcome, NULLS LAST index on deliveries.timestamp_expected.
+      Alembic uses sync psycopg2 URL for migration execution.'
+    child_tasks:
+    - brave-cipher
+    - imitate-classic
+    created_at: '2026-04-01T12:42:05.168551'
+    updated_at: '2026-04-01T12:42:05.168555'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  lexicon-think:
+    id: lexicon-think
+    title: Phase 7 — Configuration, Seed Script &amp; Nginx
+    description: 'Complete operational configuration: .env.example with all variables
+      documented, idempotent seed script (app/seed.py) that creates the initial user
+      from ADMIN_USERNAME/ADMIN_PASSWORD, and Nginx configuration for HTTP and optional
+      HTTPS modes.'
+    priority: medium
+    completed: false
+    parent_id: null
+    context: 'Arch refs: ARCH-PRESENTATION §2 (Settings), ARCH-INFRASTRUCTURE §9 (seed),
+      ARCH-OVERVIEW §6 (startup sequence). Requirements: DM-MIG-004, DM-BR-014–016,
+      SEC-REQ-001–006, SEC-REQ-041–046, DEPLOY-REQ-021–034, DEPLOY-REQ-046–048. Seed
+      script is called by entrypoint.sh with set -e — non-zero exit aborts container
+      start. Nginx must forward X-Real-IP and X-Forwarded-For for rate limiter IP
+      resolution.'
+    child_tasks:
+    - anatomy-sample
+    - garden-miracle
+    - dublin-melon
+    created_at: '2026-04-01T12:42:12.827659'
+    updated_at: '2026-04-01T12:42:12.827663'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  orient-dynasty:
+    id: orient-dynasty
+    title: Phase 8 — Testing
+    description: 'Establish the test suite structure: pytest infrastructure, domain
+      unit tests (100% branch coverage on normalisation functions), application unit
+      tests with mock repos, infrastructure integration tests (real DB via Docker),
+      and presentation integration tests via FastAPI AsyncClient.'
+    priority: medium
+    completed: false
+    parent_id: null
+    context: 'Arch refs: ARCH-DOMAIN §7, ARCH-APPLICATION §7, ARCH-INFRASTRUCTURE
+      §10, ARCH-PRESENTATION §9. Requirements: NORM-REQ-012 (100% branch coverage
+      on normalize_status + get_lifecycle_group), SEC-REQ-008 (dummy verify fires),
+      POLL-REQ-015 (no N+1 snapshot). Test DB via docker compose -f docker-compose.test.yml
+      or pytest-docker. pytest-asyncio for async test cases. app.dependency_overrides
+      for presentation layer mocking.'
+    child_tasks:
+    - billy-scale
+    - gondola-viva
+    - nobel-memo
+    - life-product
+    - rose-marble
+    created_at: '2026-04-01T12:42:20.567066'
+    updated_at: '2026-04-01T12:42:20.567070'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  young-point:
+    id: young-point
+    title: 1.1 — Create monorepo directory tree
+    description: Create the complete directory skeleton for the monorepo. No source
+      code yet — just the directory structure and __init__.py placeholders that allow
+      Python package resolution from day one.
+    priority: high
+    completed: false
+    parent_id: rufus-brother
+    context: "Architecture ref: ARCH-OVERVIEW §3 (Canonical Module Structure).\n\n\
+      Directories to create:\n```\napi/\n  app/\n    domain/entities/  domain/value_objects/\
+      \  domain/repositories/\n    application/use_cases/auth/  application/use_cases/deliveries/\n\
+      \    application/use_cases/polling/  application/use_cases/system/\n    application/dtos/\
+      \  application/services/\n    infrastructure/database/models/  infrastructure/database/repositories/\n\
+      \    infrastructure/mappers/  infrastructure/parcel_api/  infrastructure/scheduler/\n\
+      \    presentation/routers/  presentation/schemas/  presentation/middleware/\n\
+      \  alembic/versions/\nfrontend/src/\n  components/  pages/  hooks/  api/  context/\
+      \  types/\nnginx/\n.scratch/\n```\n\nAdd `__init__.py` to every Python package\
+      \ directory under api/app/.\n\nDeliverables: Complete directory tree with __init__.py\
+      \ placeholders.\nAcceptance criteria: `python -c \"import app\"` succeeds from\
+      \ api/ directory (assuming PYTHONPATH includes api/)."
+    child_tasks: []
+    created_at: '2026-04-01T12:42:40.268592'
+    updated_at: '2026-04-01T12:42:40.268595'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  shine-flower:
+    id: shine-flower
+    title: 1.2 — Python dependency manifest
+    description: Create api/requirements.txt (or pyproject.toml with optional groups)
+      listing all runtime and development dependencies with pinned major versions.
+    priority: high
+    completed: false
+    parent_id: rufus-brother
+    context: "Architecture ref: ARCH-OVERVIEW §1 (tech stack), ARCH-PRESENTATION §2\
+      \ (passlib, jose), ARCH-INFRASTRUCTURE §1.\n\nRuntime dependencies (minimum\
+      \ versions from requirements):\n  fastapi>=0.111\n  uvicorn[standard]>=0.29\n\
+      \  sqlalchemy[asyncio]>=2.0\n  psycopg[binary]>=3.1          # async psycopg3\
+      \ driver\n  psycopg2-binary                # needed by Alembic sync migration\
+      \ path\n  alembic>=1.13\n  pydantic>=2.0\n  pydantic-settings>=2.0\n  apscheduler>=3.10\n\
+      \  httpx>=0.27\n  passlib[bcrypt]                # SEC-REQ-003\n  python-jose[cryptography]\
+      \      # JWT HS256 (SEC-REQ-009)\n  structlog                      # structured\
+      \ logging (or standard logging)\n\nDev/test dependencies:\n  pytest>=8\n  pytest-asyncio>=0.23\n\
+      \  pytest-cov>=5\n  respx                          # httpx mock transport for\
+      \ ParcelAPIClient tests\n  factory-boy                    # optional; for test\
+      \ fixture factories\n  anyio[trio]                    # async test runner\n\n\
+      Deliverables: api/requirements.txt and optionally api/requirements-dev.txt.\n\
+      Acceptance criteria: `pip install -r requirements.txt` succeeds in a clean venv."
+    child_tasks: []
+    created_at: '2026-04-01T12:42:50.525243'
+    updated_at: '2026-04-01T12:42:50.525248'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  ultra-history:
+    id: ultra-history
+    title: 1.3 — Docker Compose stack
+    description: Write docker-compose.yml with all three services, the delivery_network
+      bridge network, the postgres_data named volume, health checks, and dependency
+      ordering. This is the single-command deployment entry point.
+    priority: high
+    completed: false
+    parent_id: rufus-brother
+    context: "Architecture ref: ARCH-OVERVIEW §1 (context diagram). Requirements:\
+      \ DEPLOY-REQ-001–020, DEPLOY-REQ-035–040, SEC-REQ-049–054.\n\nService: postgres\n\
+      \  image: postgres:16.3-alpine  (DEPLOY-REQ-014; pinned — SEC-REQ-054)\n  env_file:\
+      \ .env\n  volumes: postgres_data:/var/lib/postgresql/data (DEPLOY-REQ-015–017)\n\
+      \  networks: [delivery_network]\n  ports: NOT exposed on host (SEC-REQ-053;\
+      \ DEPLOY-REQ-002)\n  healthcheck: pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}\n\
+      \    interval: 10s  start_period: 30s  retries: 5  (DEPLOY-REQ-035)\n  restart:\
+      \ unless-stopped (DEPLOY-REQ-005)\n\nService: api\n  build: ./api\n  env_file:\
+      \ .env\n  networks: [delivery_network]\n  ports: NOT exposed on host (DEPLOY-REQ-002)\n\
+      \  depends_on: postgres: condition: service_healthy  (DEPLOY-REQ-004)\n  healthcheck:\
+      \ curl -f http://localhost:8000/api/health || exit 1\n    interval: 30s  start_period:\
+      \ 60s  (DEPLOY-REQ-036)\n  restart: unless-stopped\n  logging: json-file max-size:\
+      \ 50m max-file: \"5\"  (DEPLOY-REQ-038)\n\nService: frontend\n  build: ./frontend\n\
+      \  networks: [delivery_network]\n  ports: \"${FRONTEND_HTTP_PORT:-80}:80\" \
+      \ (DEPLOY-REQ-003)\n  depends_on: [api]\n  healthcheck: wget -qO- http://localhost/\
+      \ || exit 1  (DEPLOY-REQ-037)\n  restart: unless-stopped\n  logging: json-file\
+      \ max-size: 50m max-file: \"5\"\n\nVolumes:\n  postgres_data: driver: local\
+      \  (DEPLOY-REQ-015–016)\n\nNetworks:\n  delivery_network: driver: bridge  (DEPLOY-REQ-001)\n\
+      \nDeliverables: docker-compose.yml at repo root.\nAcceptance criteria: `docker\
+      \ compose config` validates without errors. All 3 healthchecks defined. postgres\
+      \ port not exposed. Only port 80 (FRONTEND_HTTP_PORT) visible on host."
+    child_tasks: []
+    created_at: '2026-04-01T12:43:03.707936'
+    updated_at: '2026-04-01T12:43:03.707942'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  torso-guide:
+    id: torso-guide
+    title: 1.4 — Dockerfiles (api + frontend)
+    description: Write the two-stage api/Dockerfile and the multi-stage frontend/Dockerfile.
+      Both must produce minimal runtime images with no build artefacts or secrets
+      included.
+    priority: high
+    completed: false
+    parent_id: rufus-brother
+    context: "Architecture ref: ARCH-PRESENTATION §3 (startup), ARCH-OVERVIEW §1.\
+      \ Requirements: DEPLOY-REQ-006–013, SEC-REQ-049–052.\n\napi/Dockerfile:\n  Stage\
+      \ 1 (builder): python:3.12-slim — install deps into /install\n    COPY requirements.txt\
+      \ .\n    RUN pip install --prefix=/install --no-cache-dir -r requirements.txt\n\
+      \  Stage 2 (runtime): python:3.12-slim  (DEPLOY-REQ-007)\n    COPY --from=builder\
+      \ /install /usr/local\n    RUN addgroup --system appgroup && adduser --system\
+      \ --ingroup appgroup appuser\n    COPY --chown=appuser:appgroup . /app\n   \
+      \ WORKDIR /app\n    USER appuser  (DEPLOY-REQ-008, SEC-REQ-049)\n    EXPOSE\
+      \ 8000\n    ENTRYPOINT [\"/app/entrypoint.sh\"]\n  Key: .env is NOT COPY'd into\
+      \ image (DEPLOY-REQ-009)\n  .dockerignore must exclude: .env, .env.*, __pycache__,\
+      \ *.pyc, .git, tests/\n\nfrontend/Dockerfile:\n  Stage 1 (builder): node:20-alpine\n\
+      \    COPY package.json package-lock.json ./\n    RUN npm ci  (DEPLOY-REQ-012)\n\
+      \    COPY . .\n    RUN npm run build\n  Stage 2 (runtime): nginx:alpine  (DEPLOY-REQ-011,\
+      \ DEPLOY-REQ-013)\n    COPY --from=builder /app/dist /usr/share/nginx/html\n\
+      \    COPY nginx.conf /etc/nginx/conf.d/default.conf\n    EXPOSE 80\n  Nginx\
+      \ worker runs as non-root (SEC-REQ-050)\n\nDeliverables: api/Dockerfile, api/.dockerignore,\
+      \ frontend/Dockerfile, frontend/.dockerignore.\nAcceptance criteria: `docker\
+      \ build -t api-test ./api` succeeds. Image runs as non-root (verify with `docker\
+      \ run --rm api-test whoami` → appuser). .env not present in image filesystem."
+    child_tasks: []
+    created_at: '2026-04-01T12:43:15.990529'
+    updated_at: '2026-04-01T12:43:15.990532'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  ocean-miller:
+    id: ocean-miller
+    title: 1.5 — api/entrypoint.sh
+    description: Write the container entrypoint shell script that runs migrations,
+      seeds the database, and launches Uvicorn in the correct order. Any failure aborts
+      the container start.
+    priority: high
+    completed: false
+    parent_id: rufus-brother
+    context: "Architecture ref: ARCH-OVERVIEW §6 (startup sequence). Requirements:\
+      \ DEPLOY-REQ-021–025, DM-MIG-001.\n\nScript content (strict order — DEPLOY-REQ-021):\n\
+      \  #!/bin/sh\n  set -e                                    # DEPLOY-REQ-022:\
+      \ any failure stops container\n\n  echo \"Running Alembic migrations...\"\n\
+      \  alembic upgrade head                      # DM-MIG-001; must run before seed\n\
+      \n  echo \"Running seed script...\"\n  python -m app.seed                  \
+      \      # DEPLOY-REQ-026–028\n\n  echo \"Starting Uvicorn...\"\n  exec uvicorn\
+      \ app.main:app \\\n    --host 0.0.0.0 \\                        # DEPLOY-REQ-024\n\
+      \    --port 8000 \\\n    --workers 1 \\                           # DEPLOY-REQ-023:\
+      \ APScheduler incompatible with >1\n    --no-access-log                    \
+      \     # DEPLOY-REQ-025 (Could Have but sensible)\n\nScript must be: chmod +x\
+      \ entrypoint.sh, LF line endings (not CRLF).\nCOPY'd into /app/entrypoint.sh\
+      \ in Dockerfile.\n\nDeliverables: api/entrypoint.sh.\nAcceptance criteria: Script\
+      \ runs without error on a fresh container with valid DB. `set -e` is present.\
+      \ `--workers 1` is present. Alembic runs before seed, seed runs before Uvicorn."
+    child_tasks: []
+    created_at: '2026-04-01T12:43:27.748134'
+    updated_at: '2026-04-01T12:43:27.748138'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  cake-queen:
+    id: cake-queen
+    title: 1.6 — Alembic initialisation
+    description: Initialise Alembic in the api/ directory, producing alembic.ini and
+      the alembic/ directory structure. The env.py is stubbed here and completed in
+      Phase 6 once ORM models exist.
+    priority: high
+    completed: false
+    parent_id: rufus-brother
+    context: "Architecture ref: ARCH-INFRASTRUCTURE §2.3 (Alembic config). Requirements:\
+      \ DM-MIG-001–003.\n\nRun from api/:\n  alembic init alembic\n\nConfigure alembic.ini:\n\
+      \  sqlalchemy.url = left blank (overridden in env.py at runtime)\n  script_location\
+      \ = alembic\n\nStub alembic/env.py to:\n  - Import settings from app.config\
+      \ (completed in Phase 5/6)\n  - Use settings.sync_database_url for migration\
+      \ execution (sync psycopg2 URL)\n  - Point target_metadata at Base.metadata\
+      \ (completed in Phase 6)\n  Note: env.py will be completed in task 6.1 once\
+      \ ORM Base exists.\n\nDeliverables: alembic.ini, alembic/env.py (stub), alembic/script.py.mako,\
+      \ alembic/versions/ (empty).\nAcceptance criteria: `alembic current` runs without\
+      \ ImportError (may show \"no current revision\" which is correct)."
+    child_tasks: []
+    created_at: '2026-04-01T12:43:37.894845'
+    updated_at: '2026-04-01T12:43:37.894848'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  politic-outside:
+    id: politic-outside
+    title: 1.7 — .gitignore and .env.example stub
+    description: Create the repository .gitignore (ensuring .env is excluded) and
+      a minimal .env.example stub with the essential variable names. The complete,
+      documented .env.example is produced in Phase 7 once all layers are known.
+    priority: medium
+    completed: false
+    parent_id: rufus-brother
+    context: "Requirements: SEC-REQ-045–046, DEPLOY-REQ-048.\n\n.gitignore must include:\n\
+      \  .env, .env.local, .env.*.local\n  __pycache__/, *.pyc, *.pyo\n  .pytest_cache/,\
+      \ .coverage, htmlcov/\n  node_modules/, dist/, .vite/\n  *.egg-info/, .eggs/\n\
+      \  .scratch/ (local working notes; not for version control)\n\n.env.example\
+      \ stub (minimal — full version produced in task 7.1):\n  # Required secrets\
+      \ — replace all placeholder values before first run\n  POSTGRES_USER=delivery\n\
+      \  POSTGRES_PASSWORD=changeme\n  POSTGRES_DB=delivery_tracking\n  DATABASE_URL=postgresql+psycopg://delivery:changeme@postgres:5432/delivery_tracking\n\
+      \  PARCEL_API_KEY=your-parcel-api-key-here\n  JWT_SECRET_KEY=replace-with-32-plus-char-secret-here\n\
+      \  ADMIN_USERNAME=admin\n  ADMIN_PASSWORD=changeme-minimum-12-chars\n\nDeliverables:\
+      \ .gitignore, .env.example.\nAcceptance criteria: .env is listed in .gitignore.\
+      \ `git check-ignore .env` returns .env. .env.example is committed to version\
+      \ control."
+    child_tasks: []
+    created_at: '2026-04-01T12:43:51.335508'
+    updated_at: '2026-04-01T12:43:51.335512'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  romeo-wizard:
+    id: romeo-wizard
+    title: '2.1 — Value objects: SemanticStatus and LifecycleGroup'
+    description: Implement the two domain value objects that provide the canonical
+      status normalisation logic. These are pure Python enums with pure functions
+      — no side effects, no external imports, deterministic for all integer inputs.
+    priority: high
+    completed: false
+    parent_id: gabriel-motif
+    context: "Architecture ref: ARCH-DOMAIN §3. Requirements: NORM-REQ-001–014.\n\n\
+      File: app/domain/value_objects/semantic_status.py\n  SemanticStatus(str, Enum)\
+      \ — 10 values: INFO_RECEIVED, IN_TRANSIT, OUT_FOR_DELIVERY,\n    AWAITING_PICKUP,\
+      \ DELIVERED, DELIVERY_FAILED, EXCEPTION, NOT_FOUND, FROZEN, UNKNOWN\n  PARCEL_CODE_TO_SEMANTIC:\
+      \ dict[int, SemanticStatus] — exact mapping from ARCH-DOMAIN §3.1:\n    0→DELIVERED,\
+      \ 1→FROZEN, 2→IN_TRANSIT, 3→AWAITING_PICKUP, 4→OUT_FOR_DELIVERY,\n    5→NOT_FOUND,\
+      \ 6→DELIVERY_FAILED, 7→EXCEPTION, 8→INFO_RECEIVED\n  normalize_status(parcel_code:\
+      \ int) → SemanticStatus\n    NEVER raises for any int (NORM-REQ-010)\n    Returns\
+      \ UNKNOWN for any code not in 0–8\n\nFile: app/domain/value_objects/lifecycle_group.py\n\
+      \  LifecycleGroup(str, Enum) — 3 values: ACTIVE, ATTENTION, TERMINAL\n  SEMANTIC_TO_LIFECYCLE:\
+      \ dict[SemanticStatus, LifecycleGroup] — exact mapping from ARCH-DOMAIN §3.2:\n\
+      \    ACTIVE: INFO_RECEIVED, IN_TRANSIT, OUT_FOR_DELIVERY, AWAITING_PICKUP\n\
+      \    ATTENTION: DELIVERY_FAILED, EXCEPTION, NOT_FOUND, UNKNOWN\n    TERMINAL:\
+      \ DELIVERED, FROZEN\n  get_lifecycle_group(status: SemanticStatus) → LifecycleGroup\n\
+      \    NEVER raises for any SemanticStatus (NORM-REQ-011)\n    UNKNOWN maps to\
+      \ ATTENTION\n\nKey constraint: These functions must achieve 100% branch coverage\
+      \ in tests (NORM-REQ-012).\nNo external imports. str/Enum base class ensures\
+      \ JSON-serialisable values.\n\nDeliverables: app/domain/value_objects/semantic_status.py,\
+      \ app/domain/value_objects/lifecycle_group.py, app/domain/value_objects/__init__.py.\n\
+      Acceptance criteria: normalize_status(0-8) returns correct statuses. normalize_status(99)\
+      \ returns UNKNOWN. get_lifecycle_group(DELIVERED) returns TERMINAL. 100% branch\
+      \ coverage verifiable by pytest-cov."
+    child_tasks: []
+    created_at: '2026-04-01T12:44:06.304216'
+    updated_at: '2026-04-01T12:44:06.304220'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  orca-garlic:
+    id: orca-garlic
+    title: 2.2 — Domain entities (5 dataclasses)
+    description: Implement all five domain entities as Python dataclasses. These are
+      plain data containers — no SQLAlchemy metadata, no FastAPI annotations, no ORM
+      relationships. They are the truth about the business model.
+    priority: high
+    completed: false
+    parent_id: gabriel-motif
+    context: "Architecture ref: ARCH-DOMAIN §2. Requirements: DM-BR-001–025, SEC-REQ-007.\n\
+      \nFile: app/domain/entities/delivery.py — Delivery dataclass\n  Fields (exact\
+      \ names and types from ARCH-DOMAIN §2.1):\n    id: UUID, tracking_number: str\
+      \ (255), carrier_code: str (50),\n    description: str (500), extra_information:\
+      \ Optional[str] (500),\n    parcel_status_code: int, semantic_status: SemanticStatus,\n\
+      \    date_expected_raw: Optional[str] (50), date_expected_end_raw: Optional[str]\
+      \ (50),\n    timestamp_expected: Optional[datetime], timestamp_expected_end:\
+      \ Optional[datetime],\n    first_seen_at: datetime, last_seen_at: datetime,\n\
+      \    created_at: datetime, updated_at: datetime, last_raw_response: Optional[dict]\n\
+      \  Invariants documented in docstring: timestamp_expected preferred for sorting\
+      \ (DM-BR-024),\n    last_raw_response is not history (DM-BR-004), semantic_status\
+      \ consistent with parcel_status_code\n\nFile: app/domain/entities/delivery_event.py\
+      \ — DeliveryEvent dataclass\n  Fields: id: UUID, delivery_id: UUID, event_description:\
+      \ str (TEXT),\n    event_date_raw: str (50, NEVER parsed — DM-BR-009/025),\n\
+      \    location: Optional[str] (255), additional_info: Optional[str] (TEXT),\n\
+      \    sequence_number: int, recorded_at: datetime\n\nFile: app/domain/entities/status_history.py\
+      \ — StatusHistory dataclass\n  Fields: id: UUID, delivery_id: UUID, previous_status_code:\
+      \ Optional[int],\n    previous_semantic_status: Optional[SemanticStatus],\n\
+      \    new_status_code: int, new_semantic_status: SemanticStatus,\n    detected_at:\
+      \ datetime (POLLER detection time, not carrier time — DM-BR-013),\n    poll_log_id:\
+      \ Optional[UUID]\n  Immutable after creation (DM-BR-012)\n\nFile: app/domain/entities/user.py\
+      \ — User dataclass\n  Fields: id: int, username: str (100, case-sensitive —\
+      \ SEC-REQ-007),\n    password_hash: str (255, always bcrypt — DM-BR-014),\n\
+      \    created_at: datetime, last_login_at: Optional[datetime],\n    is_active:\
+      \ bool, token_version: int (GAP-001; SEC-REQ-020)\n  NOTE: password_hash MUST\
+      \ be excluded from __repr__ to prevent accidental log leakage\n\nFile: app/domain/entities/poll_log.py\
+      \ — PollLog dataclass + PollOutcome enum\n  PollOutcome(str, Enum): IN_PROGRESS,\
+      \ SUCCESS, PARTIAL, ERROR  (POLL-REQ-030)\n  Fields: id: UUID, started_at: datetime,\n\
+      \    completed_at: Optional[datetime] (NULL=in_progress or interrupted — DM-BR-019),\n\
+      \    outcome: PollOutcome, deliveries_fetched: Optional[int], new_deliveries:\
+      \ Optional[int],\n    status_changes: Optional[int], new_events: Optional[int],\
+      \ error_message: Optional[str]\n\nAll imports: from __future__ import annotations,\
+      \ dataclasses, uuid, datetime, typing, enum only.\nNo Pydantic BaseModel in\
+      \ entities (use @dataclass); Pydantic reserved for DTOs.\n\nDeliverables: 5\
+      \ entity files + app/domain/entities/__init__.py.\nAcceptance criteria: `from\
+      \ app.domain.entities.delivery import Delivery` succeeds with no framework imports.\
+      \ User.__repr__ does not include password_hash. All field names match ARCH-DOMAIN\
+      \ §2 exactly."
+    child_tasks: []
+    created_at: '2026-04-01T12:44:27.161233'
+    updated_at: '2026-04-01T12:44:27.161237'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  brother-baron:
+    id: brother-baron
+    title: 2.3 — Repository ABCs (3 abstract base classes)
+    description: Define the persistence contracts as Python ABCs. These interfaces
+      define WHAT operations are possible on each aggregate without specifying HOW.
+      Application layer depends only on these; infrastructure provides the concrete
+      implementations.
+    priority: high
+    completed: false
+    parent_id: gabriel-motif
+    context: "Architecture ref: ARCH-DOMAIN §4. Requirements: POLL-REQ-015, API-REQ-012,\
+      \ API-REQ-014, DM-BR-007, SEC-REQ-021.\n\nFile: app/domain/repositories/abstract_delivery_repository.py\n\
+      \  AbstractDeliveryRepository(ABC) — 8 methods (all async):\n    get_snapshot()\
+      \ → dict[tuple[str,str], UUID]  — single query, no N+1 (POLL-REQ-015)\n    get_by_id(delivery_id:\
+      \ UUID) → Optional[Delivery]\n    list_filtered(filter_params: DeliveryFilterParams)\
+      \ → tuple[list[Delivery], int]\n      — NULLs-last for timestamp_expected (API-REQ-012),\
+      \ parameterised LIKE search (SEC-REQ-058)\n    create(delivery: Delivery) →\
+      \ Delivery\n    update(delivery: Delivery) → Delivery  — always updates last_seen_at\
+      \ (POLL-REQ-018)\n    create_event(event: DeliveryEvent) → Optional[DeliveryEvent]\
+      \  — None on dupe (DM-BR-007)\n    get_events_for_delivery(delivery_id: UUID)\
+      \ → list[DeliveryEvent]  — seq ASC (API-REQ-014)\n    create_status_history(entry:\
+      \ StatusHistory) → StatusHistory  — immutable append (DM-BR-012)\n    get_status_history_for_delivery(delivery_id:\
+      \ UUID) → list[StatusHistory]  — detected_at ASC\n\n  Note: DeliveryFilterParams\
+      \ is an Application DTO (defined in Phase 3).\n  Use TYPE_CHECKING guard or\
+      \ forward reference to avoid circular import.\n\nFile: app/domain/repositories/abstract_user_repository.py\n\
+      \  AbstractUserRepository(ABC) — 6 methods:\n    get_by_username(username: str)\
+      \ → Optional[User]  — case-sensitive (SEC-REQ-007)\n    get_by_id(user_id: int)\
+      \ → Optional[User]\n    update_last_login(user_id: int) → None  (API-REQ-007)\n\
+      \    increment_token_version(user_id: int) → int  — atomic (SEC-REQ-021)\n \
+      \   get_user_count() → int  (DM-MIG-004)\n    create(user: User) → User\n\n\
+      File: app/domain/repositories/abstract_poll_log_repository.py\n  AbstractPollLogRepository(ABC)\
+      \ — 5 methods:\n    create_in_progress(started_at: datetime) → PollLog  (DM-BR-018)\n\
+      \    complete(poll_id: UUID, outcome: PollOutcome, completed_at: datetime,\n\
+      \             deliveries_fetched, new_deliveries, status_changes, new_events,\n\
+      \             error_message) → PollLog  (POLL-REQ-020)\n    get_recent(limit:\
+      \ int = 10) → list[PollLog]\n    get_last_successful() → Optional[PollLog]\n\
+      \    count_consecutive_errors() → int  (POLL-REQ-036)\n\nImports: abc, uuid,\
+      \ datetime, typing — and domain entities/value objects. Nothing else.\n\nDeliverables:\
+      \ 3 ABC files + app/domain/repositories/__init__.py.\nAcceptance criteria: All\
+      \ methods decorated @abstractmethod. Abstract class cannot be instantiated directly.\
+      \ No SQLAlchemy, FastAPI, or httpx imports anywhere."
+    child_tasks: []
+    created_at: '2026-04-01T12:44:45.400132'
+    updated_at: '2026-04-01T12:44:45.400136'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  clone-pablo:
+    id: clone-pablo
+    title: 2.4 — Domain exceptions
+    description: Implement all domain exception classes. These represent business
+      rule violations independent of delivery mechanism — no HTTP status codes, no
+      framework imports.
+    priority: high
+    completed: false
+    parent_id: gabriel-motif
+    context: "Architecture ref: ARCH-DOMAIN §5. Requirements: API-REQ-006 (no username\
+      \ enumeration), SEC-REQ-008, NORM-REQ-005–006.\n\nFile: app/domain/exceptions.py\
+      \ — 8 exception classes:\n  DomainError(Exception) — base\n  DeliveryNotFoundError(DomainError)\
+      \  — stores identifier str\n  UserNotFoundError(DomainError)  — stores identifier\
+      \ str\n  InvalidCredentialsError(DomainError)\n    — intentionally generic message;\
+      \ prevents username enumeration (API-REQ-006, SEC-REQ-008)\n  AccountDisabledError(DomainError)\n\
+      \  TokenVersionMismatchError(DomainError)\n    — raised when JWT token_version\
+      \ ≠ users.token_version (SEC-REQ-017)\n  InvalidStatusCodeError(DomainError)\
+      \  — stores code: int; not raised during normal operation\n  AnomalousStatusTransitionError(DomainError)\n\
+      \    — stores tracking_number, from_status: SemanticStatus, to_status: SemanticStatus\n\
+      \    — raised by transition validation, caught and logged WARNING, NEVER discarded\
+      \ (NORM-REQ-005–006)\n\nNo HTTP status codes in any exception. No FastAPI HTTPException\
+      \ inheritance.\nPresentation layer is responsible for the exception → HTTP status\
+      \ code mapping.\n\nDeliverables: app/domain/exceptions.py.\nAcceptance criteria:\
+      \ All 8 classes defined. DomainError is the common base. InvalidCredentialsError\
+      \ message does not reveal whether username exists. No FastAPI, SQLAlchemy, or\
+      \ httpx imports."
+    child_tasks: []
+    created_at: '2026-04-01T12:44:58.191200'
+    updated_at: '2026-04-01T12:44:58.191204'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  kiwi-rabbit:
+    id: kiwi-rabbit
+    title: 3.1 — Application DTOs
+    description: 'Implement all Data Transfer Objects: auth DTOs, delivery DTOs (filter
+      params, summary, detail, list), and system DTOs (health, carriers, poll internals).
+      These are the typed contracts between the application layer and its callers
+      and delegates.'
+    priority: high
+    completed: false
+    parent_id: money-joshua
+    context: "Architecture ref: ARCH-APPLICATION §2. Requirements: API-REQ-010–015,\
+      \ API-REQ-026–028, NORM-REQ-003–004.\n\nFile: app/application/dtos/auth_dtos.py\n\
+      \  LoginCredentialsDTO(BaseModel): username: str (1–100), password: str (1–200)\n\
+      \  RefreshTokenClaimsDTO(BaseModel): sub: str, token_version: int, type: Literal[\"\
+      refresh\"]\n  AccessTokenClaimsDTO(BaseModel): sub: str, type: Literal[\"access\"\
+      ]=\"access\", token_version: int\n  AuthTokensDTO(BaseModel): access_token_claims:\
+      \ AccessTokenClaimsDTO, refresh_token_claims: RefreshTokenClaimsDTO\n\nFile:\
+      \ app/application/dtos/delivery_dtos.py\n  DeliveryFilterParams(BaseModel):\n\
+      \    page: int=1, page_size: int=20 (1–100, API-REQ-027),\n    lifecycle_group:\
+      \ Optional[str]=None, semantic_status: Optional[str]=None,\n    carrier_code:\
+      \ Optional[str]=None, search: Optional[str]=None (max 200),\n    sort_by: str=\"\
+      timestamp_expected\", sort_dir: str=\"asc\",\n    include_terminal: bool=False\
+      \  (default False = exclude TERMINAL, API-REQ-010)\n  DeliveryEventDTO(BaseModel):\
+      \ id, event_description, event_date_raw (str — never parsed),\n    location,\
+      \ additional_info, sequence_number, recorded_at: datetime\n  StatusHistoryEntryDTO(BaseModel):\
+      \ id, previous_status_code, previous_semantic_status,\n    new_status_code,\
+      \ new_semantic_status, detected_at: datetime\n  DeliverySummaryDTO(BaseModel):\
+      \ all delivery fields + lifecycle_group: str (derived, NORM-REQ-004)\n  DeliveryDetailDTO(DeliverySummaryDTO):\
+      \ extra_information, events: list[DeliveryEventDTO],\n    status_history: list[StatusHistoryEntryDTO]\n\
+      \  DeliveryListDTO(BaseModel): items, total, page, page_size, pages\n\nFile:\
+      \ app/application/dtos/system_dtos.py\n  HealthDatabaseDTO, HealthPollingDTO,\
+      \ HealthDTO (status: healthy/degraded/unhealthy)\n  CarrierDTO(BaseModel): code:\
+      \ str, name: str\n  CarrierListDTO(BaseModel): carriers, cached_at, cache_status:\
+      \ fresh/stale/unavailable\n  ParcelDeliveryDTO(BaseModel): full delivery shape\
+      \ from Parcel API + raw_response: dict\n  ParcelEventDTO(BaseModel): event_description,\
+      \ event_date_raw (str), location, additional_info, sequence_number\n\nNo SQLAlchemy,\
+      \ FastAPI imports. Pydantic BaseModel only.\n\nDeliverables: 3 DTO files + app/application/dtos/__init__.py.\n\
+      Acceptance criteria: All DTOs importable with no framework errors. lifecycle_group\
+      \ field present on DeliverySummaryDTO with str type (never stored, always derived).\
+      \ DeliveryFilterParams default include_terminal=False."
+    child_tasks: []
+    created_at: '2026-04-01T12:45:16.978007'
+    updated_at: '2026-04-01T12:45:16.978012'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  include-miranda:
+    id: include-miranda
+    title: 3.2 — External service interfaces (ABCs)
+    description: 'Define the abstract interfaces for the three external dependencies
+      the application layer needs to call without importing their concrete implementations:
+      the Parcel API client, the carrier cache, and the APScheduler state query.'
+    priority: high
+    completed: false
+    parent_id: money-joshua
+    context: "Architecture ref: ARCH-APPLICATION §3. Requirements: POLL-REQ-011–014,\
+      \ API-REQ-018–020.\n\nFile: app/application/services/interfaces.py (or app/application/services/\
+      \ as separate files)\n\n  AbstractParcelAPIClient(ABC):\n    async get_deliveries()\
+      \ → list[ParcelDeliveryDTO]\n      — Raises: ParcelRateLimitError (429), ParcelAuthError\
+      \ (401),\n        ParcelServerError (5xx/network after retries exhausted), ParcelResponseError\n\
+      \      — Empty list is valid return (POLL-REQ-014)\n    async get_carriers()\
+      \ → list[CarrierDTO]\n\n  AbstractCarrierCache(ABC):\n    get_carriers() → CarrierListDTO\n\
+      \      — Returns stale data without error (API-REQ-020)\n      — cache_status:\
+      \ 'fresh' | 'stale' | 'unavailable'\n    async refresh() → None\n\n  AbstractSchedulerState(ABC):\n\
+      \    is_running() → bool\n    get_next_poll_at() → Optional[datetime]  (API-REQ-018)\n\
+      \n  AbstractDBHealthChecker(ABC):\n    async check() → HealthDatabaseDTO  —\
+      \ 3s timeout (API-REQ-016)\n\nThese interfaces enable the application use cases\
+      \ to call external systems without knowing httpx or APScheduler exist. Infrastructure\
+      \ provides the concrete implementations.\n\nDeliverables: app/application/services/interfaces.py\
+      \ (or equivalent), __init__.py.\nAcceptance criteria: All 4 abstract classes\
+      \ defined with @abstractmethod. No httpx, apscheduler, fastapi imports. Use\
+      \ cases can reference these types via constructor injection."
+    child_tasks: []
+    created_at: '2026-04-01T12:45:29.657122'
+    updated_at: '2026-04-01T12:45:29.657126'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  local-invest:
+    id: local-invest
+    title: 3.3 — Auth use cases (authenticate, refresh, logout)
+    description: Implement the three authentication use cases. Each is a class with
+      a single async execute() method. The login case implements constant-time dummy
+      verification to prevent username enumeration timing attacks.
+    priority: high
+    completed: false
+    parent_id: money-joshua
+    context: "Architecture ref: ARCH-APPLICATION §4.1–4.3. Requirements: SEC-REQ-007–008,\
+      \ SEC-REQ-017, API-REQ-006–009.\n\nFile: app/application/use_cases/auth/authenticate_user.py\n\
+      \  AuthenticateUserUseCase(user_repo: AbstractUserRepository, settings: Settings-like\
+      \ or just bcrypt_rounds)\n  execute(credentials: LoginCredentialsDTO) → User:\n\
+      \    1. user_repo.get_by_username(credentials.username)\n    2. If user None:\
+      \ passlib dummy_verify(credentials.password, DUMMY_HASH)  → raise InvalidCredentialsError\n\
+      \       CRITICAL: dummy verify MUST run to prevent timing attack (SEC-REQ-008)\n\
+      \       DUMMY_HASH = bcrypt hash of a known string; computed once at module\
+      \ load time\n    3. passlib.verify(credentials.password, user.password_hash)\n\
+      \       Failure → raise InvalidCredentialsError\n    4. If not user.is_active\
+      \ → raise AccountDisabledError\n    5. await user_repo.update_last_login(user.id)\
+      \  (API-REQ-007)\n    6. return user\n\nFile: app/application/use_cases/auth/refresh_token.py\n\
+      \  RefreshAccessTokenUseCase(user_repo: AbstractUserRepository)\n  execute(claims:\
+      \ RefreshTokenClaimsDTO) → User:\n    1. user_repo.get_by_username(claims.sub)\
+      \ → None: raise UserNotFoundError\n    2. not user.is_active → raise AccountDisabledError\n\
+      \    3. user.token_version != claims.token_version → raise TokenVersionMismatchError\
+      \ (API-REQ-008)\n    4. return user\n\nFile: app/application/use_cases/auth/logout_user.py\n\
+      \  LogoutUserUseCase(user_repo: AbstractUserRepository)\n  execute(user_id:\
+      \ int) → None:\n    1. user_repo.increment_token_version(user_id)  (atomic,\
+      \ SEC-REQ-021, API-REQ-009)\n       DB errors propagate — do not swallow\n\n\
+      passlib import IS allowed in application layer (not a framework import in Clean\
+      \ Architecture terms — it's a utility library). Alternatively, inject a password\
+      \ verifier as a callable to keep the use case fully mockable; either approach\
+      \ acceptable.\n\nDeliverables: 3 use case files + app/application/use_cases/auth/__init__.py.\n\
+      Acceptance criteria: Dummy verify fires when username not found (verify with\
+      \ mock where get_by_username returns None). Inactive user raises AccountDisabledError\
+      \ not InvalidCredentialsError. token_version mismatch raises TokenVersionMismatchError."
+    child_tasks: []
+    created_at: '2026-04-01T12:45:45.327225'
+    updated_at: '2026-04-01T12:45:45.327228'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  tobacco-engine:
+    id: tobacco-engine
+    title: 3.4 — Delivery use cases (get list, get detail)
+    description: 'Implement the two delivery query use cases. These are straightforward
+      orchestrations: fetch from repo, derive lifecycle_group on each delivery, map
+      to output DTOs.'
+    priority: high
+    completed: false
+    parent_id: money-joshua
+    context: "Architecture ref: ARCH-APPLICATION §4.4–4.5. Requirements: API-REQ-010–015,\
+      \ NORM-REQ-003–004.\n\nFile: app/application/use_cases/deliveries/get_deliveries.py\n\
+      \  GetDeliveriesUseCase(delivery_repo: AbstractDeliveryRepository)\n  execute(params:\
+      \ DeliveryFilterParams) → DeliveryListDTO:\n    1. items, total = await delivery_repo.list_filtered(params)\n\
+      \    2. For each delivery: lifecycle_group = get_lifecycle_group(delivery.semantic_status)\n\
+      \       NEVER stored — derived at serialisation time (NORM-REQ-004)\n    3.\
+      \ Map Delivery → DeliverySummaryDTO (include derived lifecycle_group)\n    4.\
+      \ pages = math.ceil(total / params.page_size) if total > 0 else 0\n    5. Return\
+      \ DeliveryListDTO(items, total, page, page_size, pages)\n  Notes:\n    - include_terminal\
+      \ filter applied at repo level (repo does the DB filtering)\n    - search passed\
+      \ to repo as-is; repo handles ILIKE (SEC-REQ-058)\n    - NULLs-last sort enforced\
+      \ at repo level (API-REQ-012)\n    - Page beyond total → empty items list, not\
+      \ error (API-REQ-028)\n\nFile: app/application/use_cases/deliveries/get_delivery_detail.py\n\
+      \  GetDeliveryDetailUseCase(delivery_repo: AbstractDeliveryRepository)\n  execute(delivery_id:\
+      \ UUID) → DeliveryDetailDTO:\n    1. delivery = await delivery_repo.get_by_id(delivery_id)\n\
+      \       None → raise DeliveryNotFoundError(str(delivery_id))\n    2. events\
+      \ = await delivery_repo.get_events_for_delivery(delivery_id)\n       — ordered\
+      \ by sequence_number ASC (API-REQ-014)\n    3. history = await delivery_repo.get_status_history_for_delivery(delivery_id)\n\
+      \       — ordered by detected_at ASC (API-REQ-014)\n    4. lifecycle_group =\
+      \ get_lifecycle_group(delivery.semantic_status)\n    5. Map → DeliveryDetailDTO\
+      \  (NOT paginated — API-REQ-015)\n\nDeliverables: 2 use case files + app/application/use_cases/deliveries/__init__.py.\n\
+      Acceptance criteria: Missing delivery_id raises DeliveryNotFoundError (not 404\
+      \ — that's presentation layer). lifecycle_group present in output and derived\
+      \ from semantic_status. Events list empty → empty list returned, not error."
+    child_tasks: []
+    created_at: '2026-04-01T12:45:59.402391'
+    updated_at: '2026-04-01T12:45:59.402397'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  limbo-jamaica:
+    id: limbo-jamaica
+    title: 3.5 — Polling use case (PollAndSyncUseCase)
+    description: 'Implement the most complex use case: the 4-phase polling orchestrator.
+      This is the heart of the service — it coordinates the Parcel API call, change
+      detection against the DB snapshot, transactional writes, and poll log finalisation.'
+    priority: high
+    completed: false
+    parent_id: money-joshua
+    context: "Architecture ref: ARCH-APPLICATION §4.6 (full 4-phase spec), ARCH-OVERVIEW\
+      \ §7.1 (data flow). Requirements: POLL-REQ-003–036.\n\nFile: app/application/use_cases/polling/poll_and_sync.py\n\
+      \nPHASE 1 — Setup (before API call):\n  poll_log = await poll_log_repo.create_in_progress(started_at=utcnow())\
+      \  (DM-BR-018)\n  snapshot = await delivery_repo.get_snapshot()  — single query,\
+      \ O(1) lookup (POLL-REQ-015)\n\nPHASE 2 — Parcel API Call:\n  try: deliveries\
+      \ = await parcel_client.get_deliveries()\n  except ParcelRateLimitError: log\
+      \ WARNING, complete poll ERROR, return  (POLL-REQ-024)\n  except ParcelAuthError:\
+      \ log CRITICAL, complete poll ERROR, return  (POLL-REQ-025)\n  except ParcelServerError:\
+      \ log ERROR (all retries exhausted), complete poll ERROR, return\n  Empty list\
+      \ is valid (POLL-REQ-014) — not an error condition\n\nPHASE 3 — Change Detection\
+      \ (sequential, NOT parallel — POLL-REQ-021):\n  counters = {new: 0, status_changes:\
+      \ 0, new_events: 0, errors: 0}\n  for parcel_delivery in deliveries:\n    try:\
+      \  # per-delivery transaction (POLL-REQ-019)\n      semantic_status = normalize_status(parcel_delivery.parcel_status_code)\n\
+      \      if UNKNOWN: log WARNING with poll_id  (POLL-REQ-023, POLL-REQ-034)\n\n\
+      \      key = (parcel_delivery.tracking_number, parcel_delivery.carrier_code)\n\
+      \      if key NOT in snapshot:  # NEW DELIVERY\n        new_delivery = Delivery(...)\
+      \  # build domain entity\n        await delivery_repo.create(new_delivery)\n\
+      \        initial_history = StatusHistory(prev=None, new=semantic_status, poll_log_id=poll_log.id)\n\
+      \        await delivery_repo.create_status_history(initial_history)  (DM-BR-010)\n\
+      \        for event in parcel_delivery.events:\n          await delivery_repo.create_event(DeliveryEvent(...))\
+      \  # ON CONFLICT DO NOTHING\n        counters.new += 1\n      else:  # EXISTING\
+      \ DELIVERY\n        existing = await delivery_repo.get_by_id(snapshot[key])\n\
+      \        if existing.parcel_status_code != parcel_delivery.parcel_status_code:\
+      \  # STATUS CHANGED\n          # Check for anomalous terminal transition (NORM-REQ-005)\n\
+      \          old_group = get_lifecycle_group(existing.semantic_status)\n     \
+      \     new_group = get_lifecycle_group(semantic_status)\n          if old_group\
+      \ == LifecycleGroup.TERMINAL and new_group != LifecycleGroup.TERMINAL:\n   \
+      \         raise AnomalousStatusTransitionError(...)  # caught below, logged,\
+      \ NOT discarded\n          await delivery_repo.create_status_history(StatusHistory(prev=existing.semantic_status,\
+      \ new=semantic_status))\n          counters.status_changes += 1\n        for\
+      \ event in parcel_delivery.events:\n          result = await delivery_repo.create_event(DeliveryEvent(...))\n\
+      \          if result: counters.new_events += 1\n        existing.last_seen_at\
+      \ = utcnow()  # ALWAYS update (POLL-REQ-018)\n        existing.parcel_status_code\
+      \ = parcel_delivery.parcel_status_code\n        existing.semantic_status = semantic_status\n\
+      \        # ... update all mutable fields\n        await delivery_repo.update(existing)\n\
+      \    except AnomalousStatusTransitionError as e:\n      log WARNING  # still\
+      \ persisted (NORM-REQ-005–006)\n      # Continue with the update anyway — do\
+      \ NOT skip\n    except Exception as e:\n      log ERROR with (tracking_number,\
+      \ carrier_code, error, poll_id)  (POLL-REQ-029)\n      counters.errors += 1\
+      \  # continue to next delivery\n\nPHASE 4 — Finalise (SEPARATE transaction,\
+      \ POLL-REQ-020):\n  outcome = PollOutcome.SUCCESS if counters.errors == 0 else\
+      \ PollOutcome.PARTIAL  (POLL-REQ-030)\n  await poll_log_repo.complete(poll_log.id,\
+      \ outcome, utcnow(), counters...)\n\nCRITICAL: The use case NEVER raises. All\
+      \ errors are caught, logged, and reflected in PollLog.\nEvery log entry within\
+      \ a cycle MUST include poll_id (POLL-REQ-034).\n\nDeliverables: app/application/use_cases/polling/poll_and_sync.py,\
+      \ __init__.py.\nAcceptance criteria: New delivery creates StatusHistory with\
+      \ prev=None. Status change creates new StatusHistory entry. Duplicate event\
+      \ returns None from create_event, no error. Per-delivery failure logs ERROR\
+      \ and continues (counters.errors increments). Poll log always completed (even\
+      \ on partial failure). Anomalous terminal transition logged WARNING but delivery\
+      \ still updated."
+    child_tasks: []
+    created_at: '2026-04-01T12:46:26.564028'
+    updated_at: '2026-04-01T12:46:26.564035'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  burger-casino:
+    id: burger-casino
+    title: 3.6 — System use cases (health, carriers)
+    description: Implement GetHealthUseCase and GetCarriersUseCase. Both are designed
+      to never raise — they return structured DTOs indicating degraded or unavailable
+      state rather than propagating exceptions to the caller.
+    priority: medium
+    completed: false
+    parent_id: money-joshua
+    context: "Architecture ref: ARCH-APPLICATION §4.7–4.8. Requirements: API-REQ-016–020,\
+      \ POLL-REQ-035–036.\n\nFile: app/application/use_cases/system/get_health.py\n\
+      \  GetHealthUseCase(poll_log_repo, db_health_checker: AbstractDBHealthChecker,\
+      \ scheduler_state: AbstractSchedulerState)\n  execute() → HealthDTO:  — NEVER\
+      \ raises\n    1. Run DB check with 3s timeout (API-REQ-016):\n       try: db_status\
+      \ = await asyncio.wait_for(db_health_checker.check(), timeout=3.0)\n       except:\
+      \ db_status = HealthDatabaseDTO(status='disconnected', latency_ms=None)\n  \
+      \  2. last_poll_log = (await poll_log_repo.get_recent(1))[0] if any else None\n\
+      \    3. last_success = await poll_log_repo.get_last_successful()\n    4. consecutive_errors\
+      \ = await poll_log_repo.count_consecutive_errors()\n    5. next_poll_at = scheduler_state.get_next_poll_at()\
+      \  (API-REQ-018)\n    6. Determine status:\n       'unhealthy' if db_status.status\
+      \ == 'disconnected' OR NOT scheduler_state.is_running()\n       'degraded' if\
+      \ consecutive_errors >= 3  (POLL-REQ-036)\n       'healthy' otherwise\n    7.\
+      \ Return HealthDTO(status, database=db_status, polling=HealthPollingDTO(...))\n\
+      \n  Note: HTTP 503 vs 200 decision is made by the PRESENTATION LAYER based on\
+      \ DTO status (API-REQ-017)\n\nFile: app/application/use_cases/system/get_carriers.py\n\
+      \  GetCarriersUseCase(carrier_cache: AbstractCarrierCache)\n  execute() → CarrierListDTO:\
+      \  — NEVER makes synchronous outbound call (API-REQ-019)\n    1. return carrier_cache.get_carriers()\n\
+      \       — If never fetched: cache_status='unavailable', empty list (API-REQ-020)\n\
+      \       — If TTL expired: cache_status='stale', existing data returned without\
+      \ error\n\nDeliverables: 2 use case files + app/application/use_cases/system/__init__.py.\n\
+      Acceptance criteria: GetHealthUseCase returns 'unhealthy' DTO (not exception)\
+      \ when DB unavailable. GetHealthUseCase returns 'degraded' when consecutive_errors\
+      \ >= 3. GetCarriersUseCase never triggers an outbound HTTP call synchronously."
+    child_tasks: []
+    created_at: '2026-04-01T12:46:42.543987'
+    updated_at: '2026-04-01T12:46:42.543992'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  pedro-tactic:
+    id: pedro-tactic
+    title: 3.7 — Application exceptions
+    description: Define application-level exceptions for polling and orchestration
+      failures. Auth-related exceptions come from the domain layer and are re-raised
+      as-is. Polling exceptions form a hierarchy used by the infrastructure Parcel
+      client and caught by the polling use case.
+    priority: high
+    completed: false
+    parent_id: money-joshua
+    context: "Architecture ref: ARCH-APPLICATION §5. Requirements: POLL-REQ-024–031.\n\
+      \nFile: app/application/exceptions.py\n  ApplicationError(Exception) — base\n\
+      \  ParcelAPIError(ApplicationError) — base for all Parcel API failures\n  ParcelRateLimitError(ParcelAPIError)\
+      \  — HTTP 429 (POLL-REQ-024); non-retryable\n  ParcelAuthError(ParcelAPIError)\
+      \  — HTTP 401 (POLL-REQ-025); non-retryable; log CRITICAL\n  ParcelServerError(ParcelAPIError)\
+      \  — 5xx/network (POLL-REQ-026); retryable\n    __init__(status_code: Optional[int],\
+      \ message: str)\n  ParcelResponseError(ParcelAPIError)  — success=false in response\
+      \ body\n    __init__(error_message: str)\n  DatabaseUnavailableError(ApplicationError)\
+      \  — DB unreachable during poll (POLL-REQ-031)\n\nPresentation exception mapping\
+      \ (documented here; implemented in presentation layer):\n  InvalidCredentialsError\
+      \ (domain) → HTTP 401 INVALID_CREDENTIALS\n  AccountDisabledError (domain) →\
+      \ HTTP 403 ACCOUNT_DISABLED\n  TokenVersionMismatchError (domain) → HTTP 401\
+      \ UNAUTHORIZED\n  UserNotFoundError (domain) → HTTP 401 UNAUTHORIZED (masked,\
+      \ SEC-REQ-016)\n  DeliveryNotFoundError (domain) → HTTP 404 NOT_FOUND\n  DatabaseUnavailableError\
+      \ → HTTP 503 SERVICE_UNAVAILABLE\n\nDeliverables: app/application/exceptions.py.\n\
+      Acceptance criteria: Exception hierarchy correct (ParcelRateLimitError is-a\
+      \ ParcelAPIError is-a ApplicationError). ParcelServerError stores status_code\
+      \ attribute. No FastAPI imports."
+    child_tasks: []
+    created_at: '2026-04-01T12:46:56.649972'
+    updated_at: '2026-04-01T12:46:56.649979'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  album-time:
+    id: album-time
+    title: 4.1 — Async database engine and session factory
+    description: Set up the SQLAlchemy 2.0 async engine, the session factory, and
+      the shared DeclarativeBase. This is the foundation that all ORM models and repository
+      implementations depend on.
+    priority: high
+    completed: false
+    parent_id: chamber-open
+    context: "Architecture ref: ARCH-INFRASTRUCTURE §2.1–2.2. Requirements: DEPLOY-REQ-004\
+      \ (pool_pre_ping for Docker restarts).\n\nFile: app/infrastructure/database/engine.py\n\
+      \  from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker,\
+      \ AsyncSession\n\n  engine = create_async_engine(\n    settings.database_url,\
+      \           # postgresql+psycopg://...  (psycopg3 async driver)\n    echo=settings.environment\
+      \ == \"development\",\n    pool_size=5,\n    max_overflow=10,\n    pool_pre_ping=True,\
+      \              # CRITICAL: detect stale connections after postgres restarts\n\
+      \  )\n  async_session_factory = async_sessionmaker(\n    engine,\n    class_=AsyncSession,\n\
+      \    expire_on_commit=False,          # CRITICAL: prevent lazy-load errors after\
+      \ commit in async context\n    autocommit=False,\n    autoflush=False,\n  )\n\
+      \nFile: app/infrastructure/database/models/__init__.py\n  from sqlalchemy.orm\
+      \ import DeclarativeBase\n  class Base(DeclarativeBase):\n      pass\n  # All\
+      \ ORM models import Base from here\n\nDB URL format: postgresql+psycopg://user:pass@host:port/dbname\n\
+      \  (psycopg3 native async driver — NOT psycopg2, NOT asyncpg)\n  The sync_database_url\
+      \ used by Alembic replaces 'postgresql+psycopg' with 'postgresql+psycopg2'\n\
+      \nDatabaseHealthChecker (for GetHealthUseCase):\n  Implements AbstractDBHealthChecker\
+      \ — does a SELECT 1 with 3s timeout\n  File: app/infrastructure/database/health_checker.py\n\
+      \nDeliverables: app/infrastructure/database/engine.py, app/infrastructure/database/health_checker.py,\
+      \ app/infrastructure/database/models/__init__.py (with Base).\nAcceptance criteria:\
+      \ engine and async_session_factory importable. pool_pre_ping=True present. expire_on_commit=False\
+      \ present. Base.metadata has no tables yet (populated by ORM model imports in\
+      \ task 4.2)."
+    child_tasks: []
+    created_at: '2026-04-01T12:47:10.657687'
+    updated_at: '2026-04-01T12:47:10.657691'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  domino-senior:
+    id: domino-senior
+    title: 4.2 — SQLAlchemy ORM models (5 models)
+    description: Implement all five ORM models using SQLAlchemy 2.0 mapped_column
+      syntax. These are NOT domain entities — they carry SQLAlchemy column metadata,
+      table constraints, indexes, and relationship declarations that domain entities
+      must never see.
+    priority: high
+    completed: false
+    parent_id: chamber-open
+    context: "Architecture ref: ARCH-INFRASTRUCTURE §3. Requirements: DM-BR-001–025,\
+      \ DM-MIG-003.\n\nFile: app/infrastructure/database/models/delivery_orm.py —\
+      \ DeliveryORM(Base)\n  __tablename__ = \"deliveries\"\n  id: UUID (PK, default=uuid4)\n\
+      \  tracking_number: VARCHAR(255) NOT NULL\n  carrier_code: VARCHAR(50) NOT NULL\n\
+      \  description: VARCHAR(500) NOT NULL default=\"\"\n  extra_information: VARCHAR(500)\
+      \ nullable\n  parcel_status_code: SmallInteger NOT NULL\n  semantic_status:\
+      \ VARCHAR(50) NOT NULL\n  date_expected_raw: VARCHAR(50) nullable\n  date_expected_end_raw:\
+      \ VARCHAR(50) nullable\n  timestamp_expected: TIMESTAMPTZ nullable\n  timestamp_expected_end:\
+      \ TIMESTAMPTZ nullable\n  first_seen_at: TIMESTAMPTZ NOT NULL default=utcnow\n\
+      \  last_seen_at: TIMESTAMPTZ NOT NULL default=utcnow\n  created_at: TIMESTAMPTZ\
+      \ NOT NULL default=utcnow\n  updated_at: TIMESTAMPTZ NOT NULL default=utcnow\n\
+      \  last_raw_response: JSONB nullable  (DM-BR-004)\n  Relationships: events,\
+      \ status_history with lazy=\"raise\" (NO accidental N+1 queries)\n  __table_args__:\
+      \ UniqueConstraint(tracking_number, carrier_code, name=\"uq_delivery_tracking\"\
+      ),\n    Index on semantic_status, Index on timestamp_expected (postgresql_nulls_last=True),\
+      \ Index on last_seen_at, Index on updated_at\n\nFile: app/infrastructure/database/models/delivery_event_orm.py\
+      \ — DeliveryEventORM(Base)\n  __tablename__ = \"delivery_events\"\n  id: UUID\
+      \ (PK), delivery_id: UUID FK deliveries.id NOT NULL\n  event_description: Text\
+      \ NOT NULL, event_date_raw: VARCHAR(50) NOT NULL\n  location: VARCHAR(255) nullable,\
+      \ additional_info: Text nullable\n  sequence_number: SmallInteger NOT NULL,\
+      \ recorded_at: TIMESTAMPTZ NOT NULL\n  __table_args__: UniqueConstraint(delivery_id,\
+      \ event_description, event_date_raw,\n    name=\"uq_event_fingerprint\")  —\
+      \ deduplication (DM-BR-007)\n    Index(delivery_id, sequence_number)\n\nFile:\
+      \ app/infrastructure/database/models/status_history_orm.py — StatusHistoryORM(Base)\n\
+      \  __tablename__ = \"status_history\"\n  id: UUID (PK), delivery_id: UUID FK\
+      \ NOT NULL\n  previous_status_code: SmallInteger nullable, previous_semantic_status:\
+      \ VARCHAR(50) nullable\n  new_status_code: SmallInteger NOT NULL, new_semantic_status:\
+      \ VARCHAR(50) NOT NULL\n  detected_at: TIMESTAMPTZ NOT NULL, poll_log_id: UUID\
+      \ FK poll_logs.id nullable\n  __table_args__: Index(delivery_id, detected_at),\
+      \ Index(detected_at)\n\nFile: app/infrastructure/database/models/user_orm.py\
+      \ — UserORM(Base)\n  __tablename__ = \"users\"\n  id: Integer PK autoincrement,\
+      \ username: VARCHAR(100) NOT NULL unique\n  password_hash: VARCHAR(255) NOT\
+      \ NULL, created_at: TIMESTAMPTZ NOT NULL\n  last_login_at: TIMESTAMPTZ nullable,\
+      \ is_active: Boolean NOT NULL default=True\n  token_version: Integer NOT NULL\
+      \ default=1  ← GAP-001: required by auth design, missing from 02-data-model.md\n\
+      \nFile: app/infrastructure/database/models/poll_log_orm.py — PollLogORM(Base)\n\
+      \  __tablename__ = \"poll_logs\"\n  id: UUID (PK), started_at: TIMESTAMPTZ NOT\
+      \ NULL, completed_at: TIMESTAMPTZ nullable\n  outcome: VARCHAR(20) NOT NULL,\
+      \ deliveries_fetched/new_deliveries/status_changes/new_events: Integer nullable\n\
+      \  error_message: Text nullable\n  __table_args__: CheckConstraint(\"outcome\
+      \ IN ('in_progress','success','partial','error')\", name=\"ck_poll_log_outcome\"\
+      )\n    Index(started_at), Index(outcome)\n\nDeliverables: 5 ORM model files.\n\
+      Acceptance criteria: Base.metadata.tables contains all 5 tables when models\
+      \ imported. lazy=\"raise\" on Delivery relationships. uq_event_fingerprint unique\
+      \ constraint present on delivery_events. token_version column present on users\
+      \ table. All datetime columns use TIMESTAMPTZ."
+    child_tasks: []
+    created_at: '2026-04-01T12:47:34.766913'
+    updated_at: '2026-04-01T12:47:34.766917'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  apple-cloud:
+    id: apple-cloud
+    title: 4.3 — Domain-ORM mappers (5 mappers)
+    description: Implement the five mapper classes that translate between ORM models
+      and domain entities. These are the only code in the entire codebase that touches
+      both sides of the ORM/entity boundary. They are pure transformation logic —
+      no DB calls, no business logic.
+    priority: high
+    completed: false
+    parent_id: chamber-open
+    context: "Architecture ref: ARCH-INFRASTRUCTURE §4. This is the critical seam\
+      \ that keeps domain entities clean of SQLAlchemy metadata.\n\nPattern (each\
+      \ mapper):\n  class XxxMapper:\n    @staticmethod\n    def to_domain(orm: XxxORM)\
+      \ -> Xxx:\n        return Xxx(field1=orm.field1, ...)\n    @staticmethod\n \
+      \   def to_orm(entity: Xxx) -> XxxORM:\n        return XxxORM(field1=entity.field1,\
+      \ ...)\n\nFile: app/infrastructure/mappers/delivery_mapper.py — DeliveryMapper\n\
+      \  to_domain: maps DeliveryORM → Delivery\n    Key: SemanticStatus(orm.semantic_status)\
+      \ — convert str back to enum\n  to_orm: maps Delivery → DeliveryORM\n\nFile:\
+      \ app/infrastructure/mappers/delivery_event_mapper.py — DeliveryEventMapper\n\
+      \  to_domain: DeliveryEventORM → DeliveryEvent\n  to_orm: DeliveryEvent → DeliveryEventORM\n\
+      \nFile: app/infrastructure/mappers/status_history_mapper.py — StatusHistoryMapper\n\
+      \  to_domain: StatusHistoryORM → StatusHistory\n    Key: Optional[SemanticStatus(orm.previous_semantic_status)]\
+      \ for nullable field\n  to_orm: StatusHistory → StatusHistoryORM\n\nFile: app/infrastructure/mappers/user_mapper.py\
+      \ — UserMapper\n  to_domain: UserORM → User\n  to_orm: User → UserORM\n\nFile:\
+      \ app/infrastructure/mappers/poll_log_mapper.py — PollLogMapper\n  to_domain:\
+      \ PollLogORM → PollLog\n    Key: PollOutcome(orm.outcome) — convert str back\
+      \ to enum\n\nAll mappers import from both domain entities AND ORM models.\n\
+      They may NOT contain any SQL queries or business logic.\n\nDeliverables: 5 mapper\
+      \ files + app/infrastructure/mappers/__init__.py.\nAcceptance criteria: DeliveryMapper.to_domain(orm_instance)\
+      \ returns a Delivery dataclass, not a SQLAlchemy object. Round-trip test: to_domain(to_orm(entity))\
+      \ produces entity with same field values. SemanticStatus and PollOutcome enum\
+      \ conversions handled correctly. No DB session required to run mapper tests."
+    child_tasks: []
+    created_at: '2026-04-01T12:47:48.417851'
+    updated_at: '2026-04-01T12:47:48.417853'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  nerve-druid:
+    id: nerve-druid
+    title: 4.4 — SQLAlchemy repository implementations (3 repos)
+    description: 'Implement the three concrete repository classes. Each receives an
+      AsyncSession via constructor injection and implements its ABC. The delivery
+      repository contains the most complexity: dynamic query building for list_filtered,
+      ON CONFLICT DO NOTHING for events, and the snapshot query.'
+    priority: high
+    completed: false
+    parent_id: chamber-open
+    context: "Architecture ref: ARCH-INFRASTRUCTURE §5. Requirements: POLL-REQ-015,\
+      \ POLL-REQ-018, API-REQ-011–012, DM-BR-007, SEC-REQ-056–058, SEC-REQ-021.\n\n\
+      File: app/infrastructure/database/repositories/sqlalchemy_delivery_repository.py\n\
+      \  SQLAlchemyDeliveryRepository(AbstractDeliveryRepository):\n    __init__(self,\
+      \ session: AsyncSession)\n\n    get_snapshot():\n      SELECT tracking_number,\
+      \ carrier_code, id FROM deliveries — single query (POLL-REQ-015)\n      Returns\
+      \ dict keyed by (tracking_number, carrier_code) → id\n\n    list_filtered(params):\
+      \ Dynamic query (see ARCH-INFRASTRUCTURE §5.1):\n      Build SELECT DeliveryORM\
+      \ query\n      If not include_terminal: exclude TERMINAL statuses using semantic_status.not_in([...])\n\
+      \      If lifecycle_group: translate to list of SemanticStatus values for that\
+      \ group\n      If semantic_status: filter by exact value\n      If carrier_code:\
+      \ filter by exact value\n      If search: use ilike() with bindparam on description\
+      \ AND tracking_number (SEC-REQ-058)\n        — DO NOT use string interpolation\
+      \ for LIKE patterns\n      Count total with count subquery\n      Sort: for\
+      \ timestamp_expected use nullslast() (API-REQ-012)\n      Pagination: offset\
+      \ + limit\n      Map all results through DeliveryMapper.to_domain()\n\n    create_event():\
+      \ INSERT ... ON CONFLICT DO NOTHING ... RETURNING\n      Returns None if conflict\
+      \ (dupe fingerprint — DM-BR-007)\n      Uses postgresql insert() with on_conflict_do_nothing()\n\
+      \n    increment_token_version() (in UserRepo below): single UPDATE ... RETURNING\
+      \ (atomic, SEC-REQ-021)\n\nFile: app/infrastructure/database/repositories/sqlalchemy_user_repository.py\n\
+      \  SQLAlchemyUserRepository(AbstractUserRepository):\n    get_by_username(username:\
+      \ str): case-sensitive, no lower() (SEC-REQ-007)\n    increment_token_version(user_id):\
+      \ \n      UPDATE users SET token_version = token_version + 1 WHERE id = :id\
+      \ RETURNING token_version\n      await session.commit() inside this method (atomic,\
+      \ SEC-REQ-021)\n\nFile: app/infrastructure/database/repositories/sqlalchemy_poll_log_repository.py\n\
+      \  SQLAlchemyPollLogRepository(AbstractPollLogRepository):\n    count_consecutive_errors():\
+      \ walk recent 20 logs newest-first, stop at SUCCESS\n    create_in_progress():\
+      \ INSERT PollLogORM(outcome='in_progress'), return domain entity\n    complete():\
+      \ UPDATE PollLogORM SET outcome=..., completed_at=..., ... WHERE id=:id\n\n\
+      All repositories use DeliveryMapper, UserMapper, PollLogMapper to convert ORM↔domain.\n\
+      No string interpolation in ANY SQL. All parameters via SQLAlchemy bind params.\n\
+      \nDeliverables: 3 repository implementation files + app/infrastructure/database/repositories/__init__.py.\n\
+      Acceptance criteria: SQLAlchemyDeliveryRepository is-a AbstractDeliveryRepository\
+      \ (isinstance check). get_snapshot() issues exactly 1 DB query. list_filtered\
+      \ search uses parameterised LIKE (check with echo=True log). ON CONFLICT DO\
+      \ NOTHING for events confirmed by inserting same event twice (second returns\
+      \ None)."
+    child_tasks: []
+    created_at: '2026-04-01T12:48:10.356693'
+    updated_at: '2026-04-01T12:48:10.356696'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  hilton-person:
+    id: hilton-person
+    title: 4.5 — Parcel API client and response schemas
+    description: Implement the httpx-based Parcel API client with full retry logic,
+      and the Pydantic schemas for Parcel API response parsing. The client uses a
+      shared AsyncClient (keep-alive), implements the 3-retry exponential backoff,
+      and never logs the API key.
+    priority: high
+    completed: false
+    parent_id: chamber-open
+    context: "Architecture ref: ARCH-INFRASTRUCTURE §6. Requirements: POLL-REQ-007–014,\
+      \ POLL-REQ-024–028, POLL-REQ-033.\n\nFile: app/infrastructure/parcel_api/schemas.py\
+      \ — Pydantic models for Parcel API response:\n  ParcelAPIEvent(BaseModel): description:\
+      \ str, date: str (NEVER parse — DM-BR-009),\n    location: Optional[str], additional_info:\
+      \ Optional[str]\n  ParcelAPIDelivery(BaseModel): tracking_number: str, carrier_code:\
+      \ str, description: str,\n    extra_information: Optional[str], status_code:\
+      \ int,\n    date_expected: Optional[str] (raw — DM-BR-025), date_expected_end:\
+      \ Optional[str],\n    timestamp_expected: Optional[int] (Unix epoch — convert\
+      \ to UTC datetime on parse),\n    timestamp_expected_end: Optional[int], events:\
+      \ list[ParcelAPIEvent]=[]\n  ParcelAPIResponse(BaseModel): success: bool, deliveries:\
+      \ list[ParcelAPIDelivery]=[],\n    error_message: Optional[str]\n\nFile: app/infrastructure/parcel_api/client.py\
+      \ — ParcelAPIClient(AbstractParcelAPIClient):\n  __init__(self, client: httpx.AsyncClient,\
+      \ api_key: str, timeout: int=30, max_retries: int=3)\n  _api_key stored in private\
+      \ attribute — NEVER exposed via any method or log\n  \n  RETRY_DELAYS = [15,\
+      \ 60, 120]  (POLL-REQ-026)\n  \n  async get_deliveries() → list[ParcelDeliveryDTO]:\n\
+      \    for attempt in range(max_retries + 1):\n      response = await client.get(\"\
+      /external/deliveries/\",\n        params={\"filter_mode\": \"recent\"},  (POLL-REQ-011)\n\
+      \        headers={\"api-key\": self._api_key},  (POLL-REQ-010 — not Authorization\
+      \ header)\n        timeout=self._timeout)\n      \n      429 → raise ParcelRateLimitError\
+      \ immediately (non-retryable, POLL-REQ-024)\n      401 → raise ParcelAuthError\
+      \ immediately (non-retryable, POLL-REQ-025)\n      ≥500 → ParcelServerError\
+      \ → retry with backoff\n      ≥400 → ParcelServerError (client error, no retry)\n\
+      \      \n      body = response.json()\n      if not body.success → raise ParcelResponseError(body.error_message)\n\
+      \      return self._parse_deliveries(body.deliveries)  — empty list is valid\
+      \ (POLL-REQ-014)\n    \n    On retry: log WARNING with attempt number and delay\
+      \ (POLL-REQ-027)\n      — Log must NOT include api_key value (POLL-REQ-033)\n\
+      \    On all retries exhausted: raise ParcelServerError\n  \n  _parse_deliveries(items):\
+      \ convert ParcelAPIDelivery list → list[ParcelDeliveryDTO]\n    timestamp_expected:\
+      \ Unix epoch int → datetime.utcfromtimestamp().replace(tzinfo=UTC)\n    raw\
+      \ date strings passed through verbatim (DM-BR-025)\n    raw_response: store\
+      \ full original API response dict (DM-BR-004)\n  \n  Base URL: https://api.parcel.app\n\
+      \  TLS: verify=True (system trust store)\n\nDeliverables: app/infrastructure/parcel_api/client.py,\
+      \ app/infrastructure/parcel_api/schemas.py, __init__.py.\nAcceptance criteria:\
+      \ HTTP 429 raises ParcelRateLimitError (no retry). HTTP 503 retries up to 3\
+      \ times. API key never appears in any log output. Empty deliveries list returned\
+      \ without error. timestamp_expected epoch converted to timezone-aware UTC datetime."
+    child_tasks: []
+    created_at: '2026-04-01T12:48:34.492528'
+    updated_at: '2026-04-01T12:48:34.492532'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  neutral-grid:
+    id: neutral-grid
+    title: 4.6 — Carrier cache
+    description: Implement the in-memory carrier name cache with a 24-hour TTL. The
+      cache must serve stale data gracefully rather than erroring when the TTL has
+      expired, and silently retain existing data when a refresh attempt fails.
+    priority: medium
+    completed: false
+    parent_id: chamber-open
+    context: "Architecture ref: ARCH-INFRASTRUCTURE §7. Requirements: API-REQ-019–020.\n\
+      \nFile: app/infrastructure/parcel_api/carrier_cache.py — CarrierCache(AbstractCarrierCache):\n\
+      \  __init__(self, client: httpx.AsyncClient)\n  _carriers: list[CarrierDTO]\
+      \ = []\n  _cached_at: Optional[datetime] = None\n  _ttl_hours: int = 24\n\n\
+      \  get_carriers() → CarrierListDTO:\n    if not _cached_at: return CarrierListDTO(carriers=[],\
+      \ cached_at=None, cache_status='unavailable')\n    age = utcnow() - _cached_at\n\
+      \    status = 'fresh' if age.total_seconds() < _ttl_hours*3600 else 'stale'\n\
+      \    return CarrierListDTO(carriers=_carriers, cached_at=_cached_at, cache_status=status)\n\
+      \    — STALE data is returned WITHOUT error (API-REQ-020)\n\n  async refresh()\
+      \ → None:\n    try:\n      response = await client.get(\"https://api.parcel.app/external/supported_carriers.json\"\
+      , timeout=10.0)\n      response.raise_for_status()\n      data = response.json()\
+      \  — dict of {code: name}\n      _carriers = [CarrierDTO(code=k, name=v) for\
+      \ k, v in data.items()]\n      _cached_at = utcnow()\n    except Exception:\n\
+      \      log WARNING \"Carrier cache refresh failed; retaining existing cache\"\
+      \n      # Existing _carriers preserved — never cleared on failure (API-REQ-020)\n\
+      \nThe carrier cache refresh is registered as a separate 24h interval job in\
+      \ APScheduler\n(task 4.7). Initial population is attempted during lifespan startup\
+      \ as a non-blocking task.\n\nNo authentication needed for the carriers endpoint\
+      \ (Assumption A-09 in master requirements).\n\nDeliverables: app/infrastructure/parcel_api/carrier_cache.py.\n\
+      Acceptance criteria: get_carriers() returns 'unavailable' before first refresh.\
+      \ get_carriers() returns 'stale' after TTL expired. Failed refresh retains previous\
+      \ data. No synchronous HTTP call made by get_carriers()."
+    child_tasks: []
+    created_at: '2026-04-01T12:48:49.751362'
+    updated_at: '2026-04-01T12:48:49.751366'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  mango-arnold:
+    id: mango-arnold
+    title: 4.7 — APScheduler integration and polling scheduler
+    description: Wire APScheduler to the PollAndSyncUseCase. Configure the IntervalTrigger
+      with jitter, max_instances=1, and the session management pattern for poll cycles.
+      Implement cold-start behaviour. Provide the APSchedulerStateAdapter for health
+      queries.
+    priority: high
+    completed: false
+    parent_id: chamber-open
+    context: "Architecture ref: ARCH-INFRASTRUCTURE §8. Requirements: POLL-REQ-001–005,\
+      \ POLL-REQ-032, POLL-REQ-002, POLL-REQ-003–004.\n\nFile: app/infrastructure/scheduler/polling_scheduler.py\n\
+      \n  from apscheduler.schedulers.asyncio import AsyncIOScheduler\n  from apscheduler.triggers.interval\
+      \ import IntervalTrigger\n\n  def register_poll_job(scheduler, parcel_client,\
+      \ settings):\n    scheduler.add_job(\n      func=_run_poll_cycle,\n      args=[parcel_client],\n\
+      \      trigger=IntervalTrigger(minutes=settings.poll_interval_minutes,\n   \
+      \                           jitter=settings.poll_jitter_seconds),  # ±30s (non-negotiable)\n\
+      \      id=\"poll_and_sync\",\n      max_instances=1,    — overlapping poll dropped\
+      \ with WARNING (POLL-REQ-032)\n      coalesce=True,\n      misfire_grace_time=60,\n\
+      \      replace_existing=True,\n    )\n\n  def register_carrier_refresh_job(scheduler,\
+      \ carrier_cache):\n    scheduler.add_job(carrier_cache.refresh, trigger=IntervalTrigger(hours=24),\
+      \ id=\"carrier_refresh\")\n\n  async def _run_poll_cycle(parcel_client):\n \
+      \   \"\"\"Creates a fresh DB session for each poll cycle. Session is separate\
+      \ from HTTP request sessions.\"\"\"\n    async with async_session_factory()\
+      \ as session:\n      delivery_repo = SQLAlchemyDeliveryRepository(session)\n\
+      \      poll_log_repo = SQLAlchemyPollLogRepository(session)\n      use_case\
+      \ = PollAndSyncUseCase(delivery_repo, poll_log_repo, parcel_client)\n      await\
+      \ use_case.execute()\n    # any unhandled exception here is caught by APScheduler\
+      \ and logged\n\n  Cold-start (POLL-REQ-003): NOT triggered by scheduler — triggered\
+      \ by main.py lifespan:\n    asyncio.create_task(_run_poll_cycle(parcel_client))\
+      \  — runs in background while HTTP serving begins\n    POLL-REQ-004: This does\
+      \ NOT count against the interval; first scheduled poll fires\n             \
+      \     POLL_INTERVAL_MINUTES after the cold-start completes\n\n  APSchedulerStateAdapter(AbstractSchedulerState):\n\
+      \    — wraps an AsyncIOScheduler instance to implement the abstract interface\n\
+      \    is_running() → scheduler.running\n    get_next_poll_at() → scheduler.get_job(\"\
+      poll_and_sync\").next_run_time or None\n\n  Shutdown: scheduler.shutdown(wait=True)\
+      \ allows in-progress poll up to grace period (POLL-REQ-002)\n\nDeliverables:\
+      \ app/infrastructure/scheduler/polling_scheduler.py, __init__.py.\nAcceptance\
+      \ criteria: scheduler.add_job called with max_instances=1. IntervalTrigger has\
+      \ jitter parameter set. _run_poll_cycle creates a new session per call. APSchedulerStateAdapter.is_running()\
+      \ delegates to scheduler.running. Cold-start is asyncio.create_task (non-blocking)."
+    child_tasks: []
+    created_at: '2026-04-01T12:49:08.520676'
+    updated_at: '2026-04-01T12:49:08.520680'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  system-gyro:
+    id: system-gyro
+    title: 5.1 — pydantic-settings config (app/config.py)
+    description: Implement the Settings class using pydantic-settings BaseSettings.
+      All environment variable validation runs at import time — if any required secret
+      is missing or invalid, the application refuses to start with a clear error message.
+    priority: high
+    completed: false
+    parent_id: arizona-culture
+    context: "Architecture ref: ARCH-PRESENTATION §2 (full Settings class spec). Requirements:\
+      \ POLL-REQ-007–008, SEC-REQ-009–010, SEC-REQ-013–014, SEC-REQ-047–048, DEPLOY-REQ-048.\n\
+      \nFile: app/config.py  (lives at package root to avoid circular imports)\n\n\
+      Required fields (startup fails if absent — SEC-REQ-047):\n  parcel_api_key:\
+      \ SecretStr  (never log .get_secret_value() — POLL-REQ-007/009)\n  database_url:\
+      \ str          (postgresql+psycopg://...)\n  jwt_secret_key: SecretStr\n\nAuth\
+      \ fields with defaults:\n  jwt_algorithm: str = \"HS256\"\n  access_token_expire_minutes:\
+      \ int = 60    # valid range 5–1440 (SEC-REQ-014)\n  refresh_token_expire_days:\
+      \ int = 7       # valid range 1–30 (SEC-REQ-014)\n\nPolling:\n  poll_interval_minutes:\
+      \ int = 15   # min 5 enforced by validator (POLL-REQ-005)\n  poll_jitter_seconds:\
+      \ int = 30\n  poll_http_timeout_seconds: int = 30\n  poll_max_retries: int =\
+      \ 3\n\nSecurity:\n  bcrypt_rounds: int = 12     # valid range 10–15 (SEC-REQ-002)\n\
+      \  cookie_secure: bool = False  (SEC-REQ-023; set True when HTTPS)\n  trust_proxy_headers:\
+      \ bool = False  (SEC-REQ-040; True behind Nginx)\n  https_enabled: bool = False\n\
+      \nApplication:\n  environment: str = \"production\"   # \"development\" enables\
+      \ CORS + OpenAPI\n  version: str = \"1.0.0\"\n\nOptional first-run:\n  admin_username:\
+      \ Optional[str] = None\n  admin_password: Optional[SecretStr] = None\n  frontend_http_port:\
+      \ int = 80\n\nValidators (field_validator / model_validator):\n  jwt_secret_key:\
+      \ len(v.get_secret_value()) >= 32  → ValueError (SEC-REQ-010, SEC-REQ-048)\n\
+      \  access_token_expire_minutes: 5 <= v <= 1440  (SEC-REQ-014)\n  refresh_token_expire_days:\
+      \ 1 <= v <= 30  (SEC-REQ-014)\n  poll_interval_minutes: < 5 → clamp to 5 with\
+      \ WARNING  (POLL-REQ-005)\n  bcrypt_rounds: 10 <= v <= 15  (SEC-REQ-002)\n \
+      \ model_validator: https_enabled=True + cookie_secure=False → log WARNING  (SEC-REQ-044)\n\
+      \nsync_database_url: @property that replaces 'postgresql+psycopg' with 'postgresql+psycopg2'\n\
+      \nsettings = Settings()  — singleton created at module level; all layers import\
+      \ this one instance\n\nmodel_config = SettingsConfigDict(env_file=\".env\",\
+      \ env_file_encoding=\"utf-8\")\n\nDeliverables: app/config.py.\nAcceptance criteria:\
+      \ Settings() raises ValidationError if JWT_SECRET_KEY < 32 chars. Settings()\
+      \ raises ValidationError if parcel_api_key absent. poll_interval_minutes < 5\
+      \ is clamped to 5 (not rejected). settings.sync_database_url replaces driver\
+      \ prefix correctly."
+    child_tasks: []
+    created_at: '2026-04-01T12:49:29.439922'
+    updated_at: '2026-04-01T12:49:29.439926'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  invent-engine:
+    id: invent-engine
+    title: 5.2 — HTTP request/response schemas
+    description: Implement all Pydantic HTTP schemas for the three router groups.
+      These are separate from domain entities and application DTOs — they define the
+      exact wire format of API requests and responses including timestamp serialisation
+      format.
+    priority: high
+    completed: false
+    parent_id: arizona-culture
+    context: "Architecture ref: ARCH-PRESENTATION §4. Requirements: API-REQ-005, API-REQ-013,\
+      \ API-REQ-026–028.\n\nFile: app/presentation/schemas/auth_schemas.py\n  LoginRequest(BaseModel):\
+      \ username: str (min_length=1, max_length=100), password: str (min_length=1,\
+      \ max_length=200)\n  AccessTokenResponse(BaseModel): access_token: str, token_type:\
+      \ Literal[\"bearer\"]=\"bearer\", expires_in: int\n  LoginResponse(BaseModel):\
+      \ data: AccessTokenResponse\n  ErrorDetail(BaseModel): field: Optional[str],\
+      \ message: str\n  ErrorBody(BaseModel): code: str, message: str, details: Optional[Union[list[ErrorDetail],\
+      \ dict]]\n  ErrorResponse(BaseModel): error: ErrorBody\n  — ErrorResponse is\
+      \ shared across all routers; put in auth_schemas.py or a shared schemas/common.py\n\
+      \nFile: app/presentation/schemas/delivery_schemas.py\n  DeliveryListQueryParams(BaseModel)\
+      \ — used with Depends():\n    page: int = Field(1, ge=1)\n    page_size: int\
+      \ = Field(20, ge=1, le=100)  (API-REQ-027)\n    lifecycle_group: Optional[Literal[\"\
+      ACTIVE\",\"ATTENTION\",\"TERMINAL\"]] = None\n    semantic_status: Optional[str]\
+      \ = None\n    carrier_code: Optional[str] = Field(None, max_length=50)\n   \
+      \ search: Optional[str] = Field(None, max_length=200)  (SEC-REQ-057)\n    sort_by:\
+      \ Literal[...allowed fields...] = \"timestamp_expected\"\n    sort_dir: Literal[\"\
+      asc\",\"desc\"] = \"asc\"\n    include_terminal: bool = False\n\n  Datetime\
+      \ serialisation: ALL datetime fields serialised as ISO 8601 UTC with Z suffix\
+      \ (API-REQ-013)\n    e.g. \"2025-01-16T14:30:00Z\"  — NOT Unix timestamps\n\
+      \    Implement via model_config with custom json_encoder OR use @field_serializer\
+      \ per field\n    Use datetime.strftime(\"%Y-%m-%dT%H:%M:%SZ\") pattern\n\n \
+      \ DeliveryEventSchema, StatusHistoryEntrySchema, DeliverySummarySchema, DeliveryDetailSchema:\n\
+      \    — Mirror application DTOs but use str for timestamps (serialised form)\n\
+      \  PaginatedDeliveryResponse(data: PaginatedDeliveryData)\n  PaginatedDeliveryData(items,\
+      \ total, page, page_size, pages)\n  DeliveryDetailResponse(data: DeliveryDetailSchema)\n\
+      \nFile: app/presentation/schemas/system_schemas.py\n  DatabaseHealthSchema,\
+      \ PollingHealthSchema, HealthSchema, HealthResponse\n  CarrierSchema, CarrierListSchema,\
+      \ CarrierListResponse\n\nDeliverables: 3 schema files + app/presentation/schemas/__init__.py.\n\
+      Acceptance criteria: All timestamps in API response use \"Z\" suffix (ISO 8601\
+      \ UTC). page_size Field constraint max=100 present. DeliveryListQueryParams\
+      \ usable as FastAPI Depends(). ErrorResponse structure matches standard envelope."
+    child_tasks: []
+    created_at: '2026-04-01T12:49:48.911401'
+    updated_at: '2026-04-01T12:49:48.911404'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  iris-ethnic:
+    id: iris-ethnic
+    title: 5.3 — JWT authentication (token creation and validation)
+    description: Implement JWT token creation functions and the get_current_user FastAPI
+      dependency implementing the 6-step validation chain. This is a critical security
+      component — all 6 validation steps must be present and failures must all return
+      the same 401 response.
+    priority: high
+    completed: false
+    parent_id: arizona-culture
+    context: "Architecture ref: ARCH-PRESENTATION §5. Requirements: SEC-REQ-009–017,\
+      \ API-REQ-001–004, SEC-REQ-025–027.\n\nFile: app/presentation/auth.py (or auth\
+      \ portion of dependencies.py)\n\nToken creation:\n  create_access_token(user:\
+      \ User) → tuple[str, int]:\n    claims = {sub: user.username, type: \"access\"\
+      , token_version: user.token_version,\n              iat: now_ts, exp: (now +\
+      \ access_ttl).timestamp()}\n    token = jose.jwt.encode(claims, settings.jwt_secret_key.get_secret_value(),\
+      \ algorithm=\"HS256\")\n    return token, settings.access_token_expire_minutes\
+      \ * 60\n\n  create_refresh_token(user: User) → str:\n    claims = {sub: user.username,\
+      \ type: \"refresh\", token_version: user.token_version,\n              iat:\
+      \ now_ts, exp: (now + refresh_ttl).timestamp()}\n    return jose.jwt.encode(claims,\
+      \ ...)\n\nToken validation — get_current_user dependency (6-step chain, SEC-REQ-015):\n\
+      \  Step 1: Token present in Authorization: Bearer header  → 401 if missing\n\
+      \  Step 2: JWT signature valid (jose.jwt.decode)          → 401 if JWTError\n\
+      \  Step 3: Not expired (handled by jose decode)           → 401 if ExpiredSignatureError\n\
+      \  Step 4: type claim == \"access\"                         → 401 if wrong type\
+      \ (SEC-REQ-012)\n  Step 5: User exists AND is_active == True              →\
+      \ 401 (masked — SEC-REQ-016)\n  Step 6: token_version matches users.token_version\
+      \      → 401 (SEC-REQ-017, API-REQ-004)\n\n  ALL failures raise same HTTPException(401)\
+      \ with same generic message\n  ALL failures logged at INFO level with reason\
+      \ (NOT in response body — SEC-REQ-016, SEC-REQ-059)\n  User identity comes from\
+      \ this dependency ONLY — never from request body (SEC-REQ-027)\n\n  oauth2_scheme\
+      \ = OAuth2PasswordBearer(tokenUrl=\"/api/auth/login\", auto_error=False)\n \
+      \   — auto_error=False required so we can provide our own error envelope (API-REQ-005)\n\
+      \nget_refresh_token_claims dependency:\n  Reads refresh_token cookie from request\n\
+      \  Validates signature + expiry + type==\"refresh\"\n  Returns RefreshTokenClaimsDTO\
+      \ (does NOT validate token_version against DB — that's use case)\n\nDeliverables:\
+      \ JWT functions + get_current_user dependency.\nAcceptance criteria: get_current_user\
+      \ raises 401 for: no token, bad signature, expired, wrong type, inactive user,\
+      \ version mismatch. All 401 responses have identical response body. Wrong type\
+      \ claim (using refresh token on protected endpoint) returns 401, not 200."
+    child_tasks: []
+    created_at: '2026-04-01T12:50:08.852723'
+    updated_at: '2026-04-01T12:50:08.852727'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  bandit-nothing:
+    id: bandit-nothing
+    title: 5.4 — DI providers (dependencies.py)
+    description: Implement the full dependency injection wiring file that connects
+      application use cases to their concrete infrastructure implementations. This
+      is the architectural seam — the only place in the codebase where application
+      interfaces and infrastructure implementations are explicitly linked.
+    priority: high
+    completed: false
+    parent_id: arizona-culture
+    context: "Architecture ref: ARCH-PRESENTATION §6. Requirements: SEC-REQ-025–027.\n\
+      \nFile: app/presentation/dependencies.py\n\nSession provider:\n  async def get_async_session(request:\
+      \ Request) → AsyncGenerator[AsyncSession, None]:\n    async with async_session_factory()\
+      \ as session:\n      try: yield session; await session.commit()\n      except:\
+      \ await session.rollback(); raise\n\nRepository providers (each returns a concrete\
+      \ impl fulfilling the ABC):\n  get_delivery_repository(session=Depends(get_async_session))\
+      \ → AbstractDeliveryRepository\n    return SQLAlchemyDeliveryRepository(session)\n\
+      \  get_user_repository(session=Depends(get_async_session)) → AbstractUserRepository\n\
+      \    return SQLAlchemyUserRepository(session)\n  get_poll_log_repository(session=Depends(get_async_session))\
+      \ → AbstractPollLogRepository\n    return SQLAlchemyPollLogRepository(session)\n\
+      \nExternal service providers (read from app.state set during lifespan):\n  get_carrier_cache(request:\
+      \ Request) → AbstractCarrierCache\n    return request.app.state.carrier_cache\n\
+      \  get_scheduler_state(request: Request) → AbstractSchedulerState\n    return\
+      \ APSchedulerStateAdapter(request.app.state.scheduler)\n\nUse case providers\
+      \ (assemble use cases from their dependencies):\n  get_authenticate_use_case(user_repo=Depends(get_user_repository))\
+      \ → AuthenticateUserUseCase\n  get_refresh_use_case(user_repo=...) → RefreshAccessTokenUseCase\n\
+      \  get_logout_use_case(user_repo=...) → LogoutUserUseCase\n  get_deliveries_use_case(delivery_repo=...)\
+      \ → GetDeliveriesUseCase\n  get_delivery_detail_use_case(delivery_repo=...)\
+      \ → GetDeliveryDetailUseCase\n  get_health_use_case(poll_log_repo=..., scheduler_state=...)\
+      \ → GetHealthUseCase\n    (also injects DatabaseHealthChecker built from async_session_factory)\n\
+      \  get_carriers_use_case(carrier_cache=...) → GetCarriersUseCase\n\nRate limiter\
+      \ provider:\n  _rate_limiter = RateLimiter()  — module-level singleton (in-memory\
+      \ state, SEC-REQ-036)\n  def get_rate_limiter() → RateLimiter: return _rate_limiter\n\
+      \nImportant: No layer below presentation imports FastAPI. This file is the ONLY\
+      \ place that uses Depends().\n\nDeliverables: app/presentation/dependencies.py.\n\
+      Acceptance criteria: All use case providers return correct concrete types. get_async_session\
+      \ commits on success and rolls back on exception. app.dependency_overrides can\
+      \ replace any provider for testing. Module-level RateLimiter singleton is used\
+      \ (not created per-request)."
+    child_tasks: []
+    created_at: '2026-04-01T12:50:25.921012'
+    updated_at: '2026-04-01T12:50:25.921016'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  blue-charm:
+    id: blue-charm
+    title: 5.5 — Auth router
+    description: 'Implement the three authentication endpoints: login (with rate limiting
+      and cookie issuance), refresh (cookie-based), and logout (cookie clearing and
+      token version increment).'
+    priority: high
+    completed: false
+    parent_id: arizona-culture
+    context: "Architecture ref: ARCH-PRESENTATION §7.1. Requirements: API-REQ-006–009,\
+      \ SEC-REQ-018–024, SEC-REQ-035–040.\n\nFile: app/presentation/routers/auth_router.py\n\
+      \nPOST /api/auth/login:\n  1. source_ip = get_client_ip(request, trust_proxy=settings.trust_proxy_headers)\n\
+      \     — reads X-Real-IP or X-Forwarded-For if TRUST_PROXY_HEADERS=true (SEC-REQ-040)\n\
+      \  2. await rate_limiter.check(source_ip)  → 429 with Retry-After if exceeded\
+      \ (SEC-REQ-038–039)\n  3. try: user = await use_case.execute(LoginCredentialsDTO(username,\
+      \ password))\n     except InvalidCredentialsError: await rate_limiter.record_failure(source_ip);\
+      \ raise 401\n     except AccountDisabledError: raise 403 (BUT do not leak whether\
+      \ username exists for 401 path)\n  4. await rate_limiter.reset(source_ip)  —\
+      \ success clears counter (SEC-REQ-037)\n  5. access_token, expires_in = create_access_token(user)\n\
+      \  6. refresh_token_str = create_refresh_token(user)\n  7. response = JSONResponse(LoginResponse(...).model_dump())\n\
+      \  8. response.set_cookie(\"refresh_token\", value=refresh_token_str,\n    \
+      \   httponly=True, samesite=\"strict\", path=\"/api/auth\",\n       max_age=settings.refresh_token_expire_days\
+      \ * 86400,\n       secure=settings.cookie_secure)  (SEC-REQ-022–024)\n  9. log\
+      \ INFO: successful login (username, source_ip — NOT password)\n\nPOST /api/auth/refresh:\n\
+      \  1. claims = get_refresh_token_claims(request)  — validates cookie\n  2. user\
+      \ = await use_case.execute(claims)  — validates token_version against DB (API-REQ-008)\n\
+      \  3. Return new access token (refresh token NOT rotated — SEC-REQ-019)\n\n\
+      POST /api/auth/logout:\n  1. current_user = Depends(get_current_user)  — requires\
+      \ valid access token\n  2. await use_case.execute(current_user.id)  — increments\
+      \ token_version (SEC-REQ-020)\n  3. response = Response(status_code=204)\n \
+      \ 4. response.delete_cookie(\"refresh_token\", path=\"/api/auth\", samesite=\"\
+      strict\")\n  5. log INFO: logout (username)\n\nException → HTTP mapping (for\
+      \ this router):\n  InvalidCredentialsError → 401 INVALID_CREDENTIALS  (API-REQ-006)\n\
+      \  AccountDisabledError → 403 ACCOUNT_DISABLED\n  rate limit exceeded → 429\
+      \ RATE_LIMITED (SEC-REQ-038)\n\nDeliverables: app/presentation/routers/auth_router.py.\n\
+      Acceptance criteria: Login success sets httpOnly cookie. Login failure for unknown\
+      \ user and wrong password both return identical 401 responses. Rate limiter\
+      \ check happens BEFORE use case call. Cookie path is /api/auth. Logout returns\
+      \ 204 with deleted cookie."
+    child_tasks: []
+    created_at: '2026-04-01T12:50:44.504212'
+    updated_at: '2026-04-01T12:50:44.504224'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  shock-gossip:
+    id: shock-gossip
+    title: 5.6 — Deliveries and system routers
+    description: Implement the two deliveries endpoints and two system endpoints.
+      All deliveries endpoints require authentication via the get_current_user dependency.
+      Health is public. Carriers require authentication.
+    priority: high
+    completed: false
+    parent_id: arizona-culture
+    context: "Architecture ref: ARCH-PRESENTATION §7.2–7.3. Requirements: API-REQ-010–020,\
+      \ API-REQ-026–028.\n\nFile: app/presentation/routers/deliveries_router.py\n\n\
+      GET /api/deliveries:\n  params: DeliveryListQueryParams = Depends()  (extracts\
+      \ from query string)\n  current_user: User = Depends(get_current_user)  (SEC-REQ-026:\
+      \ explicit declaration)\n  filter_params = DeliveryFilterParams(**params.model_dump())\n\
+      \  result: DeliveryListDTO = await use_case.execute(filter_params)\n  return\
+      \ PaginatedDeliveryResponse(data=PaginatedDeliveryData(items=[...], ...))\n\
+      \  Note: Page beyond total returns empty items, NOT 404 (API-REQ-028)\n  Map\
+      \ DeliverySummaryDTO → DeliverySummarySchema (datetime → ISO 8601 Z string)\n\
+      \nGET /api/deliveries/{delivery_id}:\n  delivery_id: UUID  (FastAPI auto-validates\
+      \ UUID format)\n  current_user: User = Depends(get_current_user)\n  try: result\
+      \ = await use_case.execute(delivery_id)\n  except DeliveryNotFoundError: raise\
+      \ HTTPException(404, ErrorResponse(NOT_FOUND))\n  return DeliveryDetailResponse\
+      \  — NOT paginated (API-REQ-015)\n  Events ordered by sequence_number ASC (already\
+      \ done by use case/repo)\n\nFile: app/presentation/routers/system_router.py\n\
+      \nGET /api/health:  — NO auth required (Docker health checks run without credentials)\n\
+      \  health: HealthDTO = await use_case.execute()\n  status_code = 503 if health.status\
+      \ == \"unhealthy\" else 200  (API-REQ-017)\n  return JSONResponse(HealthResponse(data=...).model_dump(),\
+      \ status_code=status_code)\n  Note: 200 for BOTH 'healthy' and 'degraded' (API-REQ-017)\n\
+      \nGET /api/carriers:\n  current_user: User = Depends(get_current_user)  (requires\
+      \ auth)\n  result = use_case.execute()  — synchronous; returns cached data (API-REQ-019)\n\
+      \  return CarrierListResponse\n\nRoute summary (ARCH-PRESENTATION §10):\n  POST\
+      \ /api/auth/login  — no auth\n  POST /api/auth/refresh — no auth (cookie)\n\
+      \  POST /api/auth/logout  — requires Bearer token\n  GET /api/deliveries — requires\
+      \ Bearer token\n  GET /api/deliveries/{id} — requires Bearer token\n  GET /api/health\
+      \ — no auth\n  GET /api/carriers — requires Bearer token\n\nDeliverables: app/presentation/routers/deliveries_router.py,\
+      \ app/presentation/routers/system_router.py, __init__.py files.\nAcceptance\
+      \ criteria: GET /api/deliveries without token returns 401. GET /api/health without\
+      \ token returns 200/503 (not 401). GET /api/deliveries/{bad_uuid} returns 422\
+      \ (FastAPI UUID validation). GET /api/deliveries/{valid_but_missing_uuid} returns\
+      \ 404. Health returns 503 only when status is 'unhealthy'."
+    child_tasks: []
+    created_at: '2026-04-01T12:51:03.338613'
+    updated_at: '2026-04-01T12:51:03.338617'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  panel-garden:
+    id: panel-garden
+    title: 5.7 — Middleware, exception handlers, and app factory
+    description: Implement SecurityHeadersMiddleware, the in-memory RateLimiter, global
+      exception handlers, and the complete app factory with full lifespan startup/shutdown
+      sequence. This brings all layers together into the running application.
+    priority: high
+    completed: false
+    parent_id: arizona-culture
+    context: "Architecture ref: ARCH-PRESENTATION §3, §8, ARCH-OVERVIEW §6. Requirements:\
+      \ API-REQ-021–025, SEC-REQ-029–034, SEC-REQ-035–040, DEPLOY-REQ-021–023.\n\n\
+      File: app/presentation/middleware/security_headers.py — SecurityHeadersMiddleware(BaseHTTPMiddleware):\n\
+      \  Adds to ALL responses (API-REQ-021, SEC-REQ-031):\n    X-Content-Type-Options:\
+      \ nosniff\n    X-Frame-Options: DENY\n    X-XSS-Protection: 0\n    Referrer-Policy:\
+      \ strict-origin-when-cross-origin\n  Removes Server header (SEC-REQ-034): response.headers.pop(\"\
+      server\", None)\n\nFile: app/presentation/middleware/rate_limiter.py — RateLimiter:\n\
+      \  See ARCH-PRESENTATION §8.2 for full implementation\n  Sliding window: dict[ip_str,\
+      \ list[datetime]]\n  WINDOW_SECONDS=900, MAX_FAILURES=10 (SEC-REQ-035)\n  check(ip):\
+      \ raises 429 with Retry-After header if threshold exceeded (SEC-REQ-038–039)\n\
+      \  record_failure(ip): adds timestamp to failures list\n  reset(ip): removes\
+      \ IP from dict on successful login (SEC-REQ-037)\n  asyncio.Lock for thread\
+      \ safety\n\nException handlers:\n  validation_exception_handler(RequestValidationError)\
+      \ → 422 with standard error envelope (API-REQ-005)\n  generic_exception_handler(Exception)\
+      \ → 500 with INTERNAL_ERROR envelope (API-REQ-025)\n    — logs full traceback\
+      \ server-side; returns only generic message to client\n  app_exception_handler:\
+      \ maps domain/application exceptions to HTTP responses\n\nFile: app/main.py\
+      \ — create_app() + lifespan:\n  FastAPI(docs_url=None/redoc_url=None in production\
+      \ — API-REQ-023)\n  Middleware order (ARCH-PRESENTATION §3):\n    1. SecurityHeadersMiddleware\
+      \ (always)\n    2. CORSMiddleware only if environment==\"development\" (SEC-REQ-029–030)\n\
+      \  Exception handlers: RequestValidationError, Exception (generic catch-all)\n\
+      \  Router includes: auth_router prefix=/api/auth, deliveries_router prefix=/api/deliveries,\
+      \ system_router prefix=/api\n\n  lifespan startup sequence (ARCH-OVERVIEW §6):\n\
+      \    1. http_client = httpx.AsyncClient(verify=True) — shared across poll cycles\
+      \ (POLL-REQ-012)\n    2. carrier_cache = CarrierCache(http_client); asyncio.create_task(carrier_cache.refresh())\n\
+      \    3. parcel_client = ParcelAPIClient(http_client, api_key, ...)\n    4. scheduler\
+      \ = AsyncIOScheduler()\n    5. register_poll_job(scheduler, parcel_client, settings)\n\
+      \    6. register_carrier_refresh_job(scheduler, carrier_cache)\n    7. scheduler.start()\n\
+      \    8. asyncio.create_task(_run_poll_cycle(parcel_client))  — cold-start (POLL-REQ-003)\n\
+      \    9. Store all on app.state for DI access\n\n  lifespan shutdown:\n    scheduler.shutdown(wait=True)\
+      \  — allow in-progress poll (POLL-REQ-002, max 30s)\n    await http_client.aclose()\n\
+      \    await engine.dispose()\n\napp = create_app()  — module-level; Uvicorn imports\
+      \ this\n\nDeliverables: app/presentation/middleware/security_headers.py, app/presentation/middleware/rate_limiter.py,\
+      \ app/main.py.\nAcceptance criteria: All responses include X-Content-Type-Options\
+      \ and X-Frame-Options headers. No Server header in response. OpenAPI docs not\
+      \ accessible in production (ENVIRONMENT=production → /api/docs returns 404).\
+      \ CORS not configured in production. lifespan creates scheduler and cold-start\
+      \ task. 500 response has standard envelope (no stack trace)."
+    child_tasks: []
+    created_at: '2026-04-01T12:51:29.256467'
+    updated_at: '2026-04-01T12:51:29.256471'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  brave-cipher:
+    id: brave-cipher
+    title: 6.1 — Configure Alembic env.py
+    description: Complete the Alembic env.py to use the synchronous database URL from
+      app.config and point target_metadata at the ORM Base. This enables `alembic
+      upgrade head` to discover all table definitions automatically.
+    priority: high
+    completed: false
+    parent_id: budget-deluxe
+    context: "Architecture ref: ARCH-INFRASTRUCTURE §2.3. Requirements: DM-MIG-001.\n\
+      \nFile: alembic/env.py — update the stub created in task 1.6:\n\n  from app.config\
+      \ import settings\n  from app.infrastructure.database.models import Base\n \
+      \ # Import ALL ORM model modules to register them with Base.metadata:\n  from\
+      \ app.infrastructure.database.models import (\n    delivery_orm, delivery_event_orm,\
+      \ status_history_orm, user_orm, poll_log_orm\n  )\n\n  def run_migrations_online():\n\
+      \    connectable = create_engine(settings.sync_database_url)\n    with connectable.connect()\
+      \ as connection:\n      context.configure(\n        connection=connection,\n\
+      \        target_metadata=Base.metadata,\n        compare_type=True,       #\
+      \ detect column type changes\n        compare_server_default=True,\n      )\n\
+      \      with context.begin_transaction():\n        context.run_migrations()\n\
+      \n  def run_migrations_offline():\n    url = settings.sync_database_url\n  \
+      \  context.configure(url=url, target_metadata=Base.metadata, literal_binds=True)\n\
+      \    with context.begin_transaction():\n      context.run_migrations()\n\nSync\
+      \ URL format: postgresql+psycopg2://user:pass@host:port/dbname\n  (uses psycopg2\
+      \ — Alembic does NOT support psycopg3 native async driver for migrations)\n\
+      \  settings.sync_database_url property handles this substitution\n\nDeliverables:\
+      \ Completed alembic/env.py.\nAcceptance criteria: `alembic check` (or `alembic\
+      \ upgrade --sql head`) shows all 5 tables. All ORM models are discoverable via\
+      \ Base.metadata.tables after env.py executes. `alembic current` runs without\
+      \ ImportError on a fresh DB (shows \"No current revision\")."
+    child_tasks: []
+    created_at: '2026-04-01T12:51:43.237384'
+    updated_at: '2026-04-01T12:51:43.237389'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  imitate-classic:
+    id: imitate-classic
+    title: 6.2 — Initial Alembic migration (all 5 tables)
+    description: Write the initial Alembic migration revision that creates all five
+      tables with all columns, indexes, constraints, and check constraints exactly
+      as specified in the ORM models. This includes the GAP-001 token_version column
+      on users that is missing from the data model requirements document.
+    priority: high
+    completed: false
+    parent_id: budget-deluxe
+    context: "Architecture ref: ARCH-INFRASTRUCTURE §9. Requirements: DM-MIG-003,\
+      \ DM-BR-001–025, GAP-001 (ARCH-OVERVIEW §9.1).\n\nGenerate with: `alembic revision\
+      \ --autogenerate -m \"initial_schema\"` then review + clean up.\n\nFile: alembic/versions/0001_initial_schema.py\n\
+      \nCritical items to verify in generated migration:\n  deliveries table:\n  \
+      \  - last_raw_response: JSONB column (not TEXT)\n    - timestamp_expected: Index\
+      \ with nulls_last=True (postgresql_nulls_last=True)\n    - UniqueConstraint(\"\
+      tracking_number\", \"carrier_code\", name=\"uq_delivery_tracking\")\n    - semantic_status\
+      \ Index for filtering performance\n\n  delivery_events table:\n    - UniqueConstraint(\"\
+      delivery_id\", \"event_description\", \"event_date_raw\",\n        name=\"uq_event_fingerprint\"\
+      )  — deduplication (DM-BR-007, POLL-REQ-017)\n    - Index(\"idx_event_delivery_seq\"\
+      , \"delivery_id\", \"sequence_number\")\n\n  users table:\n    - token_version:\
+      \ Integer NOT NULL DEFAULT 1  (GAP-001)\n    - unique=True on username (NOT\
+      \ just an index — actual unique constraint)\n    - password_hash: VARCHAR(255)\n\
+      \n  poll_logs table:\n    - CheckConstraint(\"outcome IN ('in_progress','success','partial','error')\"\
+      , \n        name=\"ck_poll_log_outcome\")\n\n  status_history table:\n    -\
+      \ ForeignKey to poll_logs.id (nullable)\n\nDowngrade must drop all tables and\
+      \ indexes in correct dependency order:\n  delivery_events, status_history →\
+      \ deliveries → users + poll_logs\n\nAll timestamps: TIMESTAMPTZ (not TIMESTAMP\
+      \ without timezone)\nAll UUIDs: UUID type (PostgreSQL native UUID)\n\nDeliverables:\
+      \ alembic/versions/0001_initial_schema.py.\nAcceptance criteria: `alembic upgrade\
+      \ head` on a clean DB creates all 5 tables. `alembic downgrade base` drops all\
+      \ tables cleanly. token_version column present on users. uq_event_fingerprint\
+      \ unique constraint present. JSONB type used for last_raw_response. All datetime\
+      \ columns are TIMESTAMPTZ."
+    child_tasks: []
+    created_at: '2026-04-01T12:52:00.316237'
+    updated_at: '2026-04-01T12:52:00.316240'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  anatomy-sample:
+    id: anatomy-sample
+    title: 7.1 — Complete .env.example with all variables
+    description: Write the complete, documented .env.example covering every environment
+      variable from all layers. This is the operator's primary configuration reference
+      — every variable must have a comment explaining its purpose, allowed values,
+      and security implications.
+    priority: medium
+    completed: false
+    parent_id: lexicon-think
+    context: "Architecture ref: ARCH-PRESENTATION §2 (all Settings fields). Requirements:\
+      \ SEC-REQ-045–046, DEPLOY-REQ-048.\n\nSections to cover in .env.example:\n \
+      \ # ── Database ──────────────────────────────────────────────────────────────\n\
+      \  POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB\n  DATABASE_URL (postgresql+psycopg://...)\n\
+      \n  # ── Parcel API ────────────────────────────────────────────────────────────\n\
+      \  PARCEL_API_KEY  — comment: \"Never share. Never commit. Obtain from parcelapp.net\"\
+      \n  POLL_INTERVAL_MINUTES=15  — comment: \"Min 5. Default 15. Max safe = 20/hr\
+      \ rate limit allows ~3 margin\"\n\n  # ── Authentication ────────────────────────────────────────────────────────\n\
+      \  JWT_SECRET_KEY  — comment: \"REQUIRED: minimum 32 characters. Generate: openssl\
+      \ rand -hex 32\"\n  ACCESS_TOKEN_EXPIRE_MINUTES=60  — comment: \"Range 5–1440\"\
+      \n  REFRESH_TOKEN_EXPIRE_DAYS=7  — comment: \"Range 1–30\"\n  BCRYPT_ROUNDS=12\
+      \  — comment: \"Range 10–15. Higher = slower login but more secure\"\n\n  #\
+      \ ── First-run admin seeding ───────────────────────────────────────────────\n\
+      \  ADMIN_USERNAME=admin  — comment: \"Used only on first run if users table\
+      \ is empty\"\n  ADMIN_PASSWORD  — comment: \"REQUIRED for first run. Min 12\
+      \ chars. Remove after seeding.\"\n\n  # ── Security ──────────────────────────────────────────────────────────────\n\
+      \  COOKIE_SECURE=false  — comment: \"Set true when HTTPS_ENABLED=true (SEC-REQ-044)\"\
+      \n  TRUST_PROXY_HEADERS=true  — comment: \"Must be true when behind Nginx (rate\
+      \ limiter IP)\"\n  HTTPS_ENABLED=false  — comment: \"Set true if using nginx-https.conf\"\
+      \n\n  # ── Application ───────────────────────────────────────────────────────────\n\
+      \  ENVIRONMENT=production  — comment: \"development enables CORS and /api/docs\"\
+      \n  FRONTEND_HTTP_PORT=80  — comment: \"Host port for the web dashboard\"\n\n\
+      No secret values committed. All sensitive variables show placeholder like \"\
+      your-secret-here\".\nComment next to ADMIN_PASSWORD: \"IMPORTANT: Remove this\
+      \ line from .env after first container start\"\n\nDeliverables: .env.example\
+      \ (complete; updates the stub from task 1.7).\nAcceptance criteria: Every Settings\
+      \ field has a corresponding variable. Security-sensitive variables have comments\
+      \ with guidance. ADMIN_PASSWORD has a prominent warning about removal after\
+      \ first run. File can be `cp .env.example .env` as a valid starting point (operator\
+      \ fills in secrets)."
+    child_tasks: []
+    created_at: '2026-04-01T12:52:19.879501'
+    updated_at: '2026-04-01T12:52:19.879505'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  garden-miracle:
+    id: garden-miracle
+    title: 7.2 — Seed script (app/seed.py)
+    description: Implement the idempotent database seed script that creates the initial
+      admin user. Called by entrypoint.sh after migrations. Must fail with a non-zero
+      exit code if the database is empty but credentials are not configured.
+    priority: high
+    completed: false
+    parent_id: lexicon-think
+    context: "Architecture ref: ARCH-INFRASTRUCTURE §9 (seed script). Requirements:\
+      \ DM-BR-014–016, DM-MIG-004, DEPLOY-REQ-026–028, SEC-REQ-001–005.\n\nFile: app/seed.py\
+      \ (or app/seed/__main__.py for `python -m app.seed`)\n\nasync def seed_initial_user():\n\
+      \  async with async_session_factory() as session:\n    # Check user count (DM-MIG-004:\
+      \ only seed if count == 0)\n    count = await session.scalar(select(func.count(UserORM.id)))\n\
+      \    if count > 0:\n      logger.info(\"Users table non-empty; skipping seed\"\
+      )\n      return  # Idempotent (DEPLOY-REQ-027)\n\n    # Validate credentials\
+      \ are available\n    username = settings.admin_username\n    password = settings.admin_password.get_secret_value()\
+      \ if settings.admin_password else None\n\n    if not username or not password:\n\
+      \      logger.critical(\"DB empty but ADMIN_USERNAME/ADMIN_PASSWORD not configured\"\
+      )\n      sys.exit(1)  # DEPLOY-REQ-028; entrypoint set -e will abort container\n\
+      \n    if len(password) < 12:\n      logger.critical(\"ADMIN_PASSWORD must be\
+      \ at least 12 characters (SEC-REQ-005)\")\n      sys.exit(1)\n\n    # Hash password\
+      \ with bcrypt (SEC-REQ-001–003)\n    from passlib.context import CryptContext\n\
+      \    pwd_context = CryptContext(schemes=[\"bcrypt\"], deprecated=\"auto\",\n\
+      \                               bcrypt__rounds=settings.bcrypt_rounds)\n   \
+      \ password_hash = pwd_context.hash(password)\n\n    # Create user\n    session.add(UserORM(username=username,\
+      \ password_hash=password_hash,\n                        is_active=True, token_version=1))\n\
+      \    await session.commit()\n    logger.warning(\n      \"Initial admin user\
+      \ created. \"\n      \"IMPORTANT: Remove ADMIN_PASSWORD from .env file now.\"\
+      \n    )  # SEC-REQ-004: warn that password should be removed\n\nif __name__\
+      \ == \"__main__\":\n  import asyncio\n  asyncio.run(seed_initial_user())\n\n\
+      Key security requirements:\n  - password NEVER logged (SEC-REQ-061)\n  - bcrypt\
+      \ cost = settings.bcrypt_rounds (≥ 12 — SEC-REQ-001)\n  - Idempotent: safe to\
+      \ run on every container start (DEPLOY-REQ-027)\n  - Non-zero exit if DB empty\
+      \ AND no creds (DEPLOY-REQ-028)\n\nDeliverables: app/seed.py.\nAcceptance criteria:\
+      \ Running on non-empty DB = no-op (returns 0). Running on empty DB without creds\
+      \ = exit 1. Running on empty DB with creds = creates user with bcrypt hash.\
+      \ Created user has token_version=1. Password not logged at any level."
+    child_tasks: []
+    created_at: '2026-04-01T12:52:37.197278'
+    updated_at: '2026-04-01T12:52:37.197283'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  dublin-melon:
+    id: dublin-melon
+    title: 7.3 — Nginx configuration
+    description: Write the Nginx configuration for HTTP mode (default) and the optional
+      HTTPS configuration. Nginx serves the React SPA, proxies /api/* to the FastAPI
+      backend, forwards client IP headers, and adds security headers to all responses.
+    priority: medium
+    completed: false
+    parent_id: lexicon-think
+    context: "Architecture ref: ARCH-OVERVIEW §1 (context), ARCH-PRESENTATION §3.\
+      \ Requirements: DEPLOY-REQ-029–034, SEC-REQ-031–034, SEC-REQ-041–044, ADR-005.\n\
+      \nFile: nginx/nginx.conf (HTTP mode — default):\n  server {\n    listen 80;\n\
+      \    root /usr/share/nginx/html;\n    index index.html;\n\n    # SPA routing:\
+      \ try file, then SPA fallback (DEPLOY-REQ-029–030)\n    location / {\n     \
+      \ try_files $uri $uri/ /index.html;\n    }\n\n    # Static assets: aggressive\
+      \ caching for Vite hashed filenames (DEPLOY-REQ-031)\n    location ~* \\.(js|css|png|svg|ico|woff2?)$\
+      \ {\n      expires 1y;\n      add_header Cache-Control \"public, immutable\"\
+      ;\n    }\n\n    # API proxy (DEPLOY-REQ-029)\n    location /api/ {\n      proxy_pass\
+      \ http://api:8000;\n      proxy_set_header Host $host;\n      proxy_set_header\
+      \ X-Real-IP $remote_addr;       (DEPLOY-REQ-032, SEC-REQ-040)\n      proxy_set_header\
+      \ X-Forwarded-For $proxy_add_x_forwarded_for;  (DEPLOY-REQ-032)\n      proxy_set_header\
+      \ X-Forwarded-Proto $scheme;\n    }\n\n    # Security headers (SEC-REQ-032–033)\n\
+      \    add_header X-Frame-Options DENY always;\n    add_header X-Content-Type-Options\
+      \ nosniff always;\n    add_header Content-Security-Policy \"default-src 'self';\
+      \ script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src\
+      \ 'self'; img-src 'self' data:; font-src 'self'\" always;\n    add_header Referrer-Policy\
+      \ strict-origin-when-cross-origin always;\n\n    # Suppress server version (SEC-REQ-034)\n\
+      \    server_tokens off;\n  }\n\nFile: nginx/nginx-https.conf (optional HTTPS\
+      \ mode — DEPLOY-REQ-034):\n  server { listen 80; return 301 https://$host$request_uri;\
+      \ }  (SEC-REQ-042: HTTP→HTTPS redirect)\n  server {\n    listen 443 ssl;\n \
+      \   ssl_protocols TLSv1.2 TLSv1.3;  (SEC-REQ-042)\n    ssl_certificate /etc/nginx/certs/fullchain.pem;\n\
+      \    ssl_certificate_key /etc/nginx/certs/privkey.pem;\n    ... (same location\
+      \ blocks as nginx.conf above)\n    add_header Strict-Transport-Security \"max-age=31536000\"\
+      \ always;\n  }\n\nNginx worker process does NOT run as root (SEC-REQ-050) —\
+      \ achieved by nginx:alpine default config.\n\nDeliverables: nginx/nginx.conf,\
+      \ nginx/nginx-https.conf.\nAcceptance criteria: /api/ requests proxied to api:8000.\
+      \ / serves index.html with SPA fallback. X-Real-IP forwarded. Security headers\
+      \ present on all responses. server_tokens off."
+    child_tasks: []
+    created_at: '2026-04-01T12:52:53.974648'
+    updated_at: '2026-04-01T12:52:53.974653'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  billy-scale:
+    id: billy-scale
+    title: 8.1 — Test infrastructure setup
+    description: Configure pytest, create the root conftest.py with shared async fixtures,
+      and establish the test directory structure mirroring the layer hierarchy. Create
+      a test settings override that substitutes dummy secrets so tests never need
+      real credentials.
+    priority: medium
+    completed: false
+    parent_id: orient-dynasty
+    context: "Architecture ref: ARCH-DOMAIN §7, ARCH-OVERVIEW §4 (test payoff section).\
+      \ Requirements: NORM-REQ-012.\n\nDirectory structure:\n  tests/\n    conftest.py\
+      \               — root conftest; shared fixtures\n    unit/\n      domain/\n\
+      \        conftest.py\n        test_value_objects.py\n        test_entities.py\n\
+      \        test_exceptions.py\n      application/\n        conftest.py\n     \
+      \   test_auth_use_cases.py\n        test_delivery_use_cases.py\n        test_poll_and_sync.py\n\
+      \        test_system_use_cases.py\n    integration/\n      conftest.py     \
+      \        — DB fixtures (test database setup/teardown)\n      test_repositories.py\n\
+      \      test_mappers.py\n      test_parcel_client.py\n      presentation/\n \
+      \       conftest.py           — FastAPI AsyncClient fixtures\n        test_auth_routes.py\n\
+      \        test_delivery_routes.py\n        test_system_routes.py\n        test_middleware.py\n\
+      \npytest configuration (pyproject.toml [tool.pytest.ini_options]):\n  asyncio_mode\
+      \ = \"auto\"\n  testpaths = [\"tests\"]\n  addopts = \"--cov=app --cov-branch\
+      \ --cov-report=term-missing\"\n  filterwarnings = [\"ignore::DeprecationWarning\"\
+      ]\n\nRoot conftest.py key fixtures:\n  @pytest.fixture\n  def test_settings(monkeypatch):\
+      \ — overrides settings with test values:\n    PARCEL_API_KEY=test-key, JWT_SECRET_KEY=exactly-32-chars-for-testing-1234567,\n\
+      \    DATABASE_URL=postgresql+psycopg://test:test@localhost:5432/test_delivery\n\
+      \    (no real secrets needed for unit tests; domain/app layer tests don't touch\
+      \ DB)\n\n  @pytest.fixture  — for application layer unit tests\n  def mock_delivery_repo()\
+      \ → MockDeliveryRepository (in-memory ABC implementation)\n  def mock_user_repo()\
+      \ → MockUserRepository\n  def mock_poll_log_repo() → MockPollLogRepository\n\
+      \nDeliverables: tests/ directory structure, pytest config in pyproject.toml,\
+      \ root conftest.py.\nAcceptance criteria: `pytest tests/unit/` runs with no\
+      \ test database needed. `pytest --co` shows all test files discoverable. asyncio_mode=auto\
+      \ means no @pytest.mark.asyncio needed on individual tests."
+    child_tasks: []
+    created_at: '2026-04-01T12:53:10.363995'
+    updated_at: '2026-04-01T12:53:10.363999'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  gondola-viva:
+    id: gondola-viva
+    title: 8.2 — Domain layer unit tests
+    description: Write comprehensive unit tests for all domain code. The normalisation
+      functions are the highest-priority target — they require 100% branch coverage
+      per NORM-REQ-012. No database, no HTTP client, no framework fixtures needed.
+    priority: high
+    completed: false
+    parent_id: orient-dynasty
+    context: "Architecture ref: ARCH-DOMAIN §7. Requirements: NORM-REQ-010–012.\n\n\
+      File: tests/unit/domain/test_value_objects.py — CRITICAL COVERAGE REQUIREMENT:\n\
+      \  normalize_status tests (NORM-REQ-012 — 100% branch coverage):\n    @pytest.mark.parametrize(\"\
+      code,expected\", [\n      (0, SemanticStatus.DELIVERED), (1, SemanticStatus.FROZEN),\
+      \ (2, SemanticStatus.IN_TRANSIT),\n      (3, SemanticStatus.AWAITING_PICKUP),\
+      \ (4, SemanticStatus.OUT_FOR_DELIVERY),\n      (5, SemanticStatus.NOT_FOUND),\
+      \ (6, SemanticStatus.DELIVERY_FAILED),\n      (7, SemanticStatus.EXCEPTION),\
+      \ (8, SemanticStatus.INFO_RECEIVED),\n    ])\n    def test_normalize_status_known_codes(code,\
+      \ expected): ...\n\n    @pytest.mark.parametrize(\"code\", [-1, 9, 99, 1000,\
+      \ -999])\n    def test_normalize_status_unknown_returns_unknown(code):\n   \
+      \   assert normalize_status(code) == SemanticStatus.UNKNOWN  (NORM-REQ-010)\n\
+      \n  get_lifecycle_group tests (NORM-REQ-012):\n    Test all 10 SemanticStatus\
+      \ values map to expected group\n    @pytest.mark.parametrize  — all 10 values\n\
+      \    ACTIVE: INFO_RECEIVED, IN_TRANSIT, OUT_FOR_DELIVERY, AWAITING_PICKUP\n\
+      \    TERMINAL: DELIVERED, FROZEN\n    ATTENTION: DELIVERY_FAILED, EXCEPTION,\
+      \ NOT_FOUND, UNKNOWN\n\nFile: tests/unit/domain/test_entities.py:\n  test_delivery_dataclass:\
+      \ field names, types, none of the datetime fields parseable from raw strings\n\
+      \  test_user_repr_hides_password: str(User(...)) does not contain password_hash\
+      \ value\n  test_poll_outcome_enum: PollOutcome values are string-serialisable\n\
+      \nFile: tests/unit/domain/test_exceptions.py:\n  test_invalid_credentials_generic_message:\
+      \ message doesn't distinguish user/password failure\n  test_anomalous_transition_stores_statuses:\
+      \ error stores from_status and to_status attrs\n\nRun coverage check: pytest\
+      \ tests/unit/domain/test_value_objects.py --cov=app.domain.value_objects --cov-branch\n\
+      Both functions must show 100% branch coverage.\n\nDeliverables: tests/unit/domain/test_value_objects.py,\
+      \ test_entities.py, test_exceptions.py.\nAcceptance criteria: ALL 10 normalize_status\
+      \ code paths covered. ALL 10 get_lifecycle_group paths covered. Coverage report\
+      \ shows 100% branches on both functions. Tests pass with no DB or HTTP server\
+      \ running."
+    child_tasks: []
+    created_at: '2026-04-01T12:53:27.129046'
+    updated_at: '2026-04-01T12:53:27.129051'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  nobel-memo:
+    id: nobel-memo
+    title: 8.3 — Application layer unit tests
+    description: 'Write use case unit tests using in-memory mock implementations of
+      the repository ABCs. Focus on the critical business logic paths: dummy verify
+      for auth, polling phase transitions, partial failure recovery, and health degradation
+      logic.'
+    priority: high
+    completed: false
+    parent_id: orient-dynasty
+    context: "Architecture ref: ARCH-APPLICATION §7. Requirements: SEC-REQ-008, POLL-REQ-024–031.\n\
+      \nIn-memory mock pattern (defined in conftest.py):\n  class MockDeliveryRepository(AbstractDeliveryRepository):\n\
+      \    def __init__(self): self.deliveries = {}; self.events = []; self.history\
+      \ = []\n    async def get_snapshot(self): return {(d.tracking_number, d.carrier_code):\
+      \ d.id for d in self.deliveries.values()}\n    async def create(self, d): self.deliveries[d.id]\
+      \ = d; return d\n    # ... all methods implemented in-memory\n\nFile: tests/unit/application/test_auth_use_cases.py:\n\
+      \  test_login_unknown_user_calls_dummy_verify:\n    mock_repo.get_by_username\
+      \ returns None\n    — spy that passlib verify IS CALLED (timing attack prevention,\
+      \ SEC-REQ-008)\n    — raises InvalidCredentialsError\n  test_login_wrong_password_raises_invalid_credentials\n\
+      \  test_login_inactive_user_raises_account_disabled\n  test_login_updates_last_login_on_success\n\
+      \  test_refresh_token_version_mismatch_raises_error\n  test_logout_calls_increment_token_version\n\
+      \nFile: tests/unit/application/test_poll_and_sync.py:\n  test_new_delivery_creates_status_history_with_null_prev:\n\
+      \    snapshot empty → parcel returns 1 delivery → StatusHistory.prev is None\
+      \ (DM-BR-010)\n  test_status_change_creates_new_status_history\n  test_duplicate_event_does_not_raise:\n\
+      \    create_event returns None on duplicate → use case continues (DM-BR-007)\n\
+      \  test_per_delivery_failure_continues_remaining:\n    delivery 1 succeeds,\
+      \ delivery 2 raises, delivery 3 succeeds\n    → outcome=PARTIAL, errors counter=1\
+      \ (POLL-REQ-029–030)\n  test_429_skips_cycle_with_warning:\n    parcel_client.get_deliveries\
+      \ raises ParcelRateLimitError\n    → poll log completed with outcome=ERROR (POLL-REQ-024)\n\
+      \  test_401_logs_critical_skips_cycle  (POLL-REQ-025)\n  test_empty_delivery_list_is_valid\
+      \  (POLL-REQ-014)\n  test_anomalous_terminal_transition_logged_not_rejected\
+      \  (NORM-REQ-005–006)\n\nFile: tests/unit/application/test_delivery_use_cases.py:\n\
+      \  test_missing_delivery_raises_not_found\n  test_list_deliveries_derives_lifecycle_group\
+      \  (NORM-REQ-004)\n  test_page_beyond_total_returns_empty_list  (API-REQ-028)\n\
+      \nFile: tests/unit/application/test_system_use_cases.py:\n  test_health_degraded_at_3_consecutive_errors\
+      \  (POLL-REQ-036)\n  test_health_unhealthy_when_db_disconnected\n  test_carriers_never_calls_http_synchronously\
+      \  (API-REQ-019)\n\nDeliverables: 4 test files in tests/unit/application/.\n\
+      Acceptance criteria: All tests pass with mock repos (no real DB). Dummy verify\
+      \ test confirms passlib is called even when user not found. Partial failure\
+      \ test confirms polling continues after single delivery error."
+    child_tasks: []
+    created_at: '2026-04-01T12:53:49.101771'
+    updated_at: '2026-04-01T12:53:49.101778'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  life-product:
+    id: life-product
+    title: 8.4 — Infrastructure integration tests
+    description: Write integration tests for the infrastructure layer against a real
+      test database. Test the repository implementations for correct SQL generation,
+      the mapper round-trips, and the Parcel API client with mocked HTTP responses.
+    priority: medium
+    completed: false
+    parent_id: orient-dynasty
+    context: "Architecture ref: ARCH-INFRASTRUCTURE §10. Requirements: POLL-REQ-015,\
+      \ DM-BR-007, SEC-REQ-058, API-REQ-012.\n\nTest DB setup (conftest.py for integration\
+      \ tests):\n  @pytest.fixture(scope=\"session\")\n  async def test_engine():\n\
+      \    engine = create_async_engine(TEST_DATABASE_URL)\n    async with engine.begin()\
+      \ as conn: await conn.run_sync(Base.metadata.create_all)\n    yield engine\n\
+      \    async with engine.begin() as conn: await conn.run_sync(Base.metadata.drop_all)\n\
+      \    await engine.dispose()\n\n  @pytest.fixture\n  async def session(test_engine)\
+      \ → AsyncSession:  — fresh transaction per test; rolled back after\n\nFile:\
+      \ tests/integration/test_repositories.py:\n  test_delivery_snapshot_single_query:\n\
+      \    Insert 3 deliveries → snapshot returns dict with 3 entries\n    Verify:\
+      \ exactly 1 DB query issued (use echo=True + log capture or SQLAlchemy event)\n\
+      \  test_create_event_deduplication:\n    Insert same event twice → second insert\
+      \ returns None, not exception (DM-BR-007)\n    Count in DB = 1 (not 2)\n  test_list_filtered_null_last_sort:\n\
+      \    Insert 3 deliveries: timestamp_expected = [None, datetime1, datetime2]\n\
+      \    list_filtered(sort_by=\"timestamp_expected\", sort_dir=\"asc\")\n    →\
+      \ delivery with None should be LAST (API-REQ-012)\n  test_list_filtered_search_parameterised:\n\
+      \    Verify no SQL injection possible: search='%test%' finds correct records,\n\
+      \    search=\"'; DROP TABLE deliveries; --\" returns empty list harmlessly (SEC-REQ-058)\n\
+      \  test_increment_token_version_atomic:\n    UserORM with token_version=1\n\
+      \    increment_token_version(user.id) returns 2\n    DB row shows token_version=2\n\
+      \nFile: tests/integration/test_mappers.py:\n  test_delivery_mapper_round_trip:\
+      \ to_domain(to_orm(delivery)) == delivery\n  test_enum_roundtrip: SemanticStatus\
+      \ survives ORM<→domain conversion\n  test_poll_outcome_roundtrip: PollOutcome\
+      \ survives conversion\n\nFile: tests/integration/test_parcel_client.py (using\
+      \ respx for HTTP mocking):\n  test_successful_response_parsed\n  test_429_raises_rate_limit_error\
+      \  (no retry)\n  test_401_raises_auth_error  (no retry)\n  test_503_retries_3_times_then_raises\n\
+      \  test_empty_deliveries_list_valid  (POLL-REQ-014)\n  test_api_key_not_in_logs\
+      \  (POLL-REQ-033)\n  test_timestamp_epoch_converted_to_utc_datetime\n\nDeliverables:\
+      \ tests/integration/ test files.\nAcceptance criteria: All integration tests\
+      \ pass with TEST_DATABASE_URL set. Deduplication test confirms ON CONFLICT DO\
+      \ NOTHING works. NULL-last sort test verifiable. API key never appears in captured\
+      \ log output."
+    child_tasks: []
+    created_at: '2026-04-01T12:54:09.346598'
+    updated_at: '2026-04-01T12:54:09.346602'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+  rose-marble:
+    id: rose-marble
+    title: 8.5 — Presentation layer integration tests
+    description: Write route handler tests using FastAPI's AsyncClient and dependency_overrides
+      to substitute mock use cases. Test the JWT 6-step validation chain exhaustively,
+      security headers on all responses, and rate limiter behaviour.
+    priority: medium
+    completed: false
+    parent_id: orient-dynasty
+    context: "Architecture ref: ARCH-PRESENTATION §9. Requirements: SEC-REQ-015–016,\
+      \ API-REQ-005, API-REQ-021–023, API-REQ-025.\n\nBase fixture pattern:\n  @pytest.fixture\n\
+      \  async def client(app) → AsyncClient:\n    # Override use cases with mocks\
+      \ via app.dependency_overrides\n    app.dependency_overrides[get_deliveries_use_case]\
+      \ = lambda: MockGetDeliveriesUseCase()\n    app.dependency_overrides[get_current_user]\
+      \ = lambda: fake_user()  # for auth bypass\n    async with AsyncClient(app=app,\
+      \ base_url=\"http://test\") as c: yield c\n    app.dependency_overrides.clear()\n\
+      \nFile: tests/integration/presentation/test_auth_routes.py:\n  test_login_success_sets_httponly_cookie\n\
+      \  test_login_wrong_password_401  — same response as unknown username\n  test_login_unknown_user_401\
+      \  — must be identical body to wrong password (API-REQ-006)\n  test_login_rate_limit_after_10_failures\
+      \  → 429 with Retry-After header (SEC-REQ-038–039)\n  test_refresh_validates_token_version_mismatch\n\
+      \  test_logout_clears_cookie_and_increments_token_version\n  test_refresh_token_as_access_token_rejected\
+      \  — wrong type claim → 401\n\nFile: tests/integration/presentation/test_delivery_routes.py:\n\
+      \  test_list_deliveries_requires_auth  → 401 without token\n  test_list_deliveries_returns_paginated_response\n\
+      \  test_get_delivery_not_found_returns_404\n  test_get_delivery_invalid_uuid_returns_422\n\
+      \  test_list_deliveries_page_beyond_total_returns_empty_not_404  (API-REQ-028)\n\
+      \nFile: tests/integration/presentation/test_middleware.py:\n  test_all_responses_have_security_headers:\n\
+      \    Check X-Content-Type-Options, X-Frame-Options, Referrer-Policy on every\
+      \ endpoint\n    (API-REQ-021)\n  test_no_server_header  (SEC-REQ-034)\n  test_no_openapi_in_production:\n\
+      \    ENVIRONMENT=production → /api/docs returns 404 (API-REQ-023)\n  test_500_returns_standard_envelope_not_stacktrace\
+      \  (API-REQ-025)\n  test_validation_error_returns_standard_envelope  (API-REQ-005)\n\
+      \nFile: tests/integration/presentation/test_jwt.py:\n  test_6_step_chain_each_step_fails_correctly:\n\
+      \    Each step failure returns identical 401 body (SEC-REQ-015–016)\n  test_expired_token_returns_401\n\
+      \  test_token_version_mismatch_returns_401  (SEC-REQ-017)\n\nDeliverables: tests/integration/presentation/\
+      \ test files.\nAcceptance criteria: Login success test verifies cookie is httponly\
+      \ + samesite=strict + path=/api/auth. Two different 401 causes produce identical\
+      \ response bodies. /api/docs returns 404 in production environment. Security\
+      \ headers test passes for all 7 endpoints. Rate limiter test resets on successful\
+      \ login."
+    child_tasks: []
+    created_at: '2026-04-01T12:54:28.133102'
+    updated_at: '2026-04-01T12:54:28.133108'
+    completed_at: null
+    completion_report: null
+    completion_signoff_by: null
+    requires_completion_signoff: 'true'
+    lessons_learned: []
+    active: false
+lessons_learned: []
+root_tasks:
+- rufus-brother
+- gabriel-motif
+- money-joshua
+- chamber-open
+- arizona-culture
+- budget-deluxe
+- lexicon-think
+- orient-dynasty
+created_at: '2026-04-01T12:41:06.783684'
+updated_at: '2026-04-01T12:54:28.133116'
+current_task_id: null
