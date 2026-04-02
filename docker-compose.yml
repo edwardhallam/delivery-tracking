@@ -28,6 +28,8 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     env_file: .env
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     depends_on:
       postgres:
         condition: service_healthy
@@ -35,7 +37,7 @@ services:
       - delivery_network
     # DEPLOY-REQ-002: No ports exposed on host
     healthcheck:  # DEPLOY-REQ-036
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8000/api/health"]
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -51,6 +53,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     ports:
       - "${FRONTEND_HTTP_PORT:-80}:80"  # DEPLOY-REQ-003
     depends_on:
@@ -58,7 +62,7 @@ services:
     networks:
       - delivery_network
     healthcheck:  # DEPLOY-REQ-037
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:80/"]
       interval: 30s
       timeout: 5s
       retries: 3
