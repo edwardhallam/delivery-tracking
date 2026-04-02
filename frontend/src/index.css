@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+/*
+ * Font imports — self-hosted via Google Fonts CSS.
+ * The nginx CSP allows font-src 'self' and style-src 'self' 'unsafe-inline',
+ * so we use @font-face declarations that point to Google's CDN at build time.
+ * Vite inlines the CSS, and fonts load from fonts.gstatic.com.
+ *
+ * NOTE: If the CSP blocks external font loading in production, download the
+ * font files to public/fonts/ and update the src URLs below.
+ */
+
+/* Space Grotesk — headings, nav, buttons */
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/spacegrotesk/v16/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/spacegrotesk/v16/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/spacegrotesk/v16/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/spacegrotesk/v16/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2") format("woff2");
+}
+
+/* Inter — body, labels, tables */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hiA.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hiA.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hiA.woff2") format("woff2");
+}
+
+@theme {
+  --font-heading: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --color-bg: #F8FAFC;
+  --color-card: #FFFFFF;
+  --color-primary: #2563EB;
+  --color-primary-hover: #1D4ED8;
+  --color-text: #0D0D0D;
+  --color-text-secondary: #6B7280;
+  --color-text-muted: #9CA3AF;
+  --color-border: #E5E7EB;
+  --color-border-strong: #D1D5DB;
+  --color-input-border: #D1D5DB;
+
+  --color-success: #16A34A;
+  --color-success-bg: #F0FDF4;
+  --color-danger: #DC2626;
+  --color-danger-bg-light: #FEF2F2;
+  --color-danger-bg: #FEE2E2;
+  --color-active-blue: #2563EB;
+  --color-active-blue-bg: #EFF6FF;
+  --color-poll-green: #22C55E;
+  --color-secondary-bg: #F3F4F6;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
