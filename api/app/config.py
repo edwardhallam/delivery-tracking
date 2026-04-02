@@ -4,66 +4,93 @@ ARCH-OVERVIEW §8.1: All environment variables validated at import time.
 A Settings instance is created once — all layers receive it via constructor
 injection or Depends(), never via global import in production code.
 """
+from __future__ import annotations
 
 import logging
-from typing import Literal
+from typing import Literal, Optional
 
-from pydantic import field_validator
-from pydantic_settings import BaseSettings
+from pydantic import SecretStr, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 logger = logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
-    """Environment-driven application configuration."""
+    """Environment-driven application configuration.
+
+    Required fields (startup fails if absent — SEC-REQ-047):
+      PARCEL_API_KEY, DATABASE_URL, JWT_SECRET_KEY
+
+    All SecretStr fields are never logged or exposed in tracebacks.
+    """
 
     # ── Database ─────────────────────────────────────────────
     DATABASE_URL: str
+    """Async PostgreSQL URL:  postgresql+psycopg://user:pass@host:5432/db"""
 
     # ── Parcel API ───────────────────────────────────────────
-    PARCEL_API_KEY: str
+    PARCEL_API_KEY: SecretStr
+    """API key for api.parcel.app — never logged (POLL-REQ-007/009, SEC-REQ-047)."""
 
     # ── Authentication ───────────────────────────────────────
-    JWT_SECRET_KEY: str
+    JWT_SECRET_KEY: SecretStr
+    """HS256 signing key — must be ≥ 32 characters (SEC-REQ-010, SEC-REQ-048)."""
+
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    """Valid range: 5–1440 minutes (SEC-REQ-014)."""
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    """Valid range: 1–30 days (SEC-REQ-014)."""
+
     BCRYPT_ROUNDS: int = 12
+    """bcrypt cost factor — valid range: 10–15 (SEC-REQ-002)."""
     COOKIE_SECURE: bool = False
+    """Set True when running behind HTTPS (SEC-REQ-023)."""
     TRUST_PROXY_HEADERS: bool = True
+    """Read X-Real-IP / X-Forwarded-For for rate limiting (SEC-REQ-040)."""
 
     # ── First-run seeding (optional after first start) ───────
-    ADMIN_USERNAME: str | None = None
-    ADMIN_PASSWORD: str | None = None
+    ADMIN_USERNAME: Optional[str] = None
+    ADMIN_PASSWORD: Optional[SecretStr] = None
 
     # ── Polling ──────────────────────────────────────────────
     POLL_INTERVAL_MINUTES: int = 15
+    """Poll cadence in minutes — values < 5 are clamped to 5 (POLL-REQ-005)."""
     POLL_JITTER_SECONDS: int = 30
+    """Maximum random jitter added to each interval (±N seconds)."""
     POLL_HTTP_TIMEOUT_SECONDS: int = 30
     POLL_MAX_RETRIES: int = 3
 
     # ── Application ──────────────────────────────────────────
     ENVIRONMENT: Literal["development", "production"] = "production"
+    """'development' enables CORS and OpenAPI docs."""
     LOG_LEVEL: str = "INFO"
+    VERSION: str = "1.0.0"
 
     # ── Frontend / HTTPS ─────────────────────────────────────
     HTTPS_ENABLED: bool = False
+    FRONTEND_HTTP_PORT: int = 80
 
-    model_config = {"env_file": ".env", "extra": "ignore"}
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
     # ── Validators ───────────────────────────────────────────
 
     @field_validator("PARCEL_API_KEY")
     @classmethod
-    def parcel_api_key_non_empty(cls, v: str) -> str:
-        if not v.strip():
+    def parcel_api_key_non_empty(cls, v: SecretStr) -> SecretStr:
+        if not v.get_secret_value().strip():
             raise ValueError("PARCEL_API_KEY must be a non-empty string")
         return v
 
     @field_validator("JWT_SECRET_KEY")
     @classmethod
-    def jwt_secret_min_length(cls, v: str) -> str:
-        if len(v) < 32:
+    def jwt_secret_min_length(cls, v: SecretStr) -> SecretStr:
+        """JWT secret must be at least 32 characters (SEC-REQ-010, SEC-REQ-048)."""
+        if len(v.get_secret_value()) < 32:
             raise ValueError("JWT_SECRET_KEY must be at least 32 characters")
         return v
 
@@ -84,8 +111,17 @@ class Settings(BaseSettings):
     @field_validator("POLL_INTERVAL_MINUTES")
     @classmethod
     def poll_interval_minimum(cls, v: int) -> int:
+        """Values below 5 are clamped to 5 with a warning (POLL-REQ-005).
+
+        A clamp (not rejection) prevents startup failures when the operator
+        sets an aggressive interval during development.
+        """
         if v < 5:
-            raise ValueError("POLL_INTERVAL_MINUTES must be at least 5")
+            logger.warning(
+                "POLL_INTERVAL_MINUTES=%d is below the minimum of 5; clamping to 5",
+                v,
+            )
+            return 5
         return v
 
     @field_validator("BCRYPT_ROUNDS")
@@ -116,15 +152,38 @@ class Settings(BaseSettings):
             raise ValueError("POLL_MAX_RETRIES must be between 0 and 5")
         return v
 
+    @field_validator("ENVIRONMENT", mode="before")
+    @classmethod
+    def normalise_environment(cls, v: str) -> str:
+        """Normalise to lowercase so ENVIRONMENT=PRODUCTION works too."""
+        return str(v).lower()
 
-def _warn_https_cookie_mismatch(s: Settings) -> None:
-    if s.HTTPS_ENABLED and not s.COOKIE_SECURE:
-        logger.warning(
-            "HTTPS_ENABLED=true but COOKIE_SECURE=false — "
-            "cookies will not have the Secure flag set"
+    # ── Computed properties ───────────────────────────────────
+
+    @property
+    def sync_database_url(self) -> str:
+        """Synchronous database URL for Alembic migrations.
+
+        Replaces the async ``postgresql+psycopg://`` driver prefix with the
+        synchronous ``postgresql+psycopg2://`` prefix required by Alembic's
+        ``env.py``.  If the URL already uses psycopg2, it is returned unchanged.
+        """
+        return self.DATABASE_URL.replace(
+            "postgresql+psycopg://", "postgresql+psycopg2://", 1
         )
 
 
-# Module-level singleton — validated at import time
+def _warn_https_cookie_mismatch(s: Settings) -> None:
+    """Log a warning when HTTPS is enabled but cookie Secure flag is off."""
+    if s.HTTPS_ENABLED and not s.COOKIE_SECURE:
+        logger.warning(
+            "HTTPS_ENABLED=true but COOKIE_SECURE=false — "
+            "cookies will not have the Secure flag set (SEC-REQ-044)"
+        )
+
+
+# Module-level singleton — validated at import time (SEC-REQ-047).
+# All layers that need settings should receive this instance via DI or
+# explicit parameter — never re-instantiate Settings().
 settings = Settings()  # type: ignore[call-arg]
 _warn_https_cookie_mismatch(settings)

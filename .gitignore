@@ -7,11 +7,18 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.egg-info/
+.eggs/
 dist/
 build/
 *.egg
 .venv/
 venv/
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
 
 # Node
 node_modules/
@@ -32,3 +39,6 @@ docker-compose.override.yml
 
 # Agent C artifacts
 .agent_c/
+
+# Local working notes — not for version control
+.scratch/

@@ -4,3 +4,19 @@ commands:
   mkdir:
     always_allowed:
     - -p *
+  python3:
+    subcommands:
+      '*':
+        always_allowed:
+        - ''
+    always_allowed:
+    - -m *
+    - -c *
+  ls:
+    always_allowed:
+    - ''
+  .venv/bin/pip:
+    subcommands:
+      install:
+        always_allowed:
+        - '*'

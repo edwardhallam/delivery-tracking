@@ -1,0 +1,30 @@
+# Exclude dev artefacts from the frontend build context.
+
+# Dependencies — reinstalled inside the image via npm ci
+node_modules/
+
+# Build output — rebuilt inside the image via npm run build
+dist/
+.vite/
+
+# Tests
+coverage/
+
+# Environment files
+.env
+.env.*
+*.env.local
+
+# Version control
+.git/
+.gitignore
+
+# Editor artefacts
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

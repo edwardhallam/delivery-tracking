@@ -1,0 +1,43 @@
+# DEPLOY-REQ-009 / SEC-REQ-049: Never bake secrets or dev artefacts into the image.
+
+# Secrets — must never enter the build context
+.env
+.env.*
+*.env.local
+
+# Python byte-code and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.mypy_cache/
+.ruff_cache/
+
+# Tests — not needed in the runtime image
+tests/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Version control
+.git/
+.gitignore
+
+# Dev tooling
+.venv/
+venv/
+*.egg-info/
+.eggs/
+
+# Editor artefacts
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Working notes
+.scratch/

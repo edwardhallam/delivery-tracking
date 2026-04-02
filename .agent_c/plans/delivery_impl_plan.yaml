@@ -44,7 +44,7 @@ tasks:
       Nginx config, and environment file template. Nothing domain-specific is written
       here — this phase produces the chassis that every subsequent phase builds into.'
     priority: high
-    completed: false
+    completed: true
     parent_id: null
     context: 'Arch refs: ARCH-OVERVIEW §3 (module structure), ARCH-INFRASTRUCTURE
       §2.3 (Alembic), ARCH-PRESENTATION §3 (lifespan/entrypoint), 08-deployment requirements
@@ -60,9 +60,32 @@ tasks:
     - politic-outside
     created_at: '2026-04-01T12:41:26.501607'
     updated_at: '2026-04-01T12:41:26.501610'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T13:43:17.425572'
+    completion_report: 'All 7 Phase 1 subtasks complete. Monorepo skeleton is production-ready:
+
+
+      - Complete directory tree with __init__.py in all 18 Python package directories
+
+      - requirements.txt (13 runtime deps) + requirements-dev.txt (7 test deps); psycopg2-binary
+      included for Alembic
+
+      - docker-compose.yml: 3 services, health checks, depends_on service_healthy,
+      postgres not host-exposed, named volume, bridge network
+
+      - api/Dockerfile: two-stage build, non-root appuser, EXPOSE 8000; api/.dockerignore
+      blocks .env and dev artefacts
+
+      - frontend/Dockerfile: placeholder nginx:alpine; frontend/.dockerignore in place
+
+      - api/entrypoint.sh: set -e, alembic → seed → uvicorn --workers 1
+
+      - alembic.ini + alembic/env.py stub (target_metadata=None; completed in Phase
+      6)
+
+      - .gitignore: covers secrets, byte-code, test artefacts, Node, IDE, OS, .scratch/
+
+      - .env.example: all variable groups documented with inline guidance'
+    completion_signoff_by: Archie
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -74,7 +97,7 @@ tasks:
       All code in this phase must be independently testable with plain pytest and
       no database.'
     priority: high
-    completed: false
+    completed: true
     parent_id: null
     context: 'Arch refs: ARCH-DOMAIN (entire document). Requirements: DM-BR-001–026,
       NORM-REQ-001–014, SEC-REQ-007. Key invariant: no SQLAlchemy, FastAPI, httpx,
@@ -86,9 +109,13 @@ tasks:
     - clone-pablo
     created_at: '2026-04-01T12:41:33.718342'
     updated_at: '2026-04-01T12:41:33.718346'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T14:29:53.543475'
+    completion_report: 'All 4 Phase 2 subtasks were previously completed. Domain layer
+      is fully implemented: SemanticStatus + LifecycleGroup value objects with normalize_status()
+      and get_lifecycle_group(); 5 domain entity dataclasses (Delivery, DeliveryEvent,
+      StatusHistory, User, PollLog); 3 abstract repository ABCs; and domain exceptions
+      hierarchy. Zero framework imports in app/domain/.'
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -100,7 +127,7 @@ tasks:
       application exceptions. This layer orchestrates domain logic but imports nothing
       from infrastructure or presentation.
     priority: high
-    completed: false
+    completed: true
     parent_id: null
     context: 'Arch refs: ARCH-APPLICATION (entire document). Requirements: POLL-REQ-003–036,
       API-REQ-001–028, SEC-REQ-007–021, NORM-REQ-003–006. PollAndSyncUseCase is the
@@ -116,9 +143,15 @@ tasks:
     - pedro-tactic
     created_at: '2026-04-01T12:41:41.200119'
     updated_at: '2026-04-01T12:41:41.200123'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T13:56:43.043193'
+    completion_report: 'Phase 3 — Application Layer fully implemented. 19 files written
+      across 7 sub-tasks: exceptions.py, 3 DTO files, services/interfaces.py, 3 auth
+      use cases, 2 delivery use cases, 1 polling use case, 2 system use cases, and
+      all __init__.py files. All 19 modules verified to import cleanly. Zero forbidden
+      imports (sqlalchemy, fastapi, httpx, apscheduler) confirmed by grep. One design
+      improvement made: _dummy_hash() uses lru_cache for lazy computation rather than
+      module-load-time bcrypt call.'
+    completion_signoff_by: Archie
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -130,7 +163,7 @@ tasks:
       with retry logic, carrier cache, and APScheduler integration. This is the only
       layer that imports SQLAlchemy, httpx, and APScheduler.'
     priority: high
-    completed: false
+    completed: true
     parent_id: null
     context: 'Arch refs: ARCH-INFRASTRUCTURE (entire document). Requirements: DM-BR-001–026,
       DM-MIG-001–004, POLL-REQ-007–036, SEC-REQ-001–004, SEC-REQ-021. Critical: ORM
@@ -147,9 +180,18 @@ tasks:
     - mango-arnold
     created_at: '2026-04-01T12:41:49.196912'
     updated_at: '2026-04-01T12:41:49.196916'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T14:31:21.962782'
+    completion_report: 'Phase 4 Infrastructure Layer is complete. All 7 tasks implemented
+      and verified. 27/27 import + ABC contract checks pass. Two bugs were found and
+      fixed during validation: (1) TIMESTAMPTZ is not exported by sqlalchemy.dialects.postgresql
+      in SQLAlchemy 2.0 — replaced with TIMESTAMP(timezone=True) in all 5 ORM models;
+      the database behaviour is identical (PostgreSQL still uses TIMESTAMPTZ columns).
+      (2) str | None union syntax in config.py failed on Python 3.9 (local dev machine)
+      — fixed by adding from __future__ import annotations and changing to Optional[str];
+      no functional change for the Python 3.12 Docker target. All domain and application
+      layer purity checks pass: zero SQLAlchemy imports in app/domain/ or app/application/.
+      All 7 abstract interface contracts satisfied by concrete implementations.'
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -161,7 +203,7 @@ tasks:
       headers middleware, rate limiter, exception handlers, and the app factory with
       full lifespan management. Only layer that imports FastAPI.'
     priority: high
-    completed: false
+    completed: true
     parent_id: null
     context: 'Arch refs: ARCH-PRESENTATION (entire document). Requirements: API-REQ-001–028,
       SEC-REQ-009–040, SEC-REQ-047–048, SEC-REQ-055–061, DEPLOY-REQ-021–024. JWT 6-step
@@ -178,9 +220,16 @@ tasks:
     - panel-garden
     created_at: '2026-04-01T12:41:56.629441'
     updated_at: '2026-04-01T12:41:56.629445'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T14:53:12.510689'
+    completion_report: 'All 7 subtasks completed. Phase 5 delivers the complete FastAPI
+      presentation layer: pydantic-settings config with SecretStr and validators;
+      HTTP schemas with ISO 8601 datetime serialisation; JWT creation/6-step-validation;
+      full DI wiring in dependencies.py; auth/deliveries/system routers; SecurityHeadersMiddleware;
+      sliding-window RateLimiter; and the app factory with lifespan managing all shared
+      resources. All Phase 5 acceptance criteria verified against system Python with
+      no Docker required. Clean Architecture respected: no infrastructure or FastAPI
+      imports outside the presentation layer.'
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -275,7 +324,7 @@ tasks:
       code yet — just the directory structure and __init__.py placeholders that allow
       Python package resolution from day one.
     priority: high
-    completed: false
+    completed: true
     parent_id: rufus-brother
     context: "Architecture ref: ARCH-OVERVIEW §3 (Canonical Module Structure).\n\n\
       Directories to create:\n```\napi/\n  app/\n    domain/entities/  domain/value_objects/\
@@ -292,9 +341,17 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:42:40.268592'
     updated_at: '2026-04-01T12:42:40.268595'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T13:41:59.288442'
+    completion_report: 'Complete directory skeleton created with __init__.py in every
+      Python package directory under api/app/: domain/entities, domain/value_objects,
+      domain/repositories, application/use_cases/auth, application/use_cases/deliveries,
+      application/use_cases/polling, application/use_cases/system, application/dtos,
+      application/services, infrastructure/database/models, infrastructure/database/repositories,
+      infrastructure/mappers, infrastructure/parcel_api, infrastructure/scheduler,
+      presentation/routers, presentation/schemas, presentation/middleware. Frontend
+      src subdirectories (components, pages, hooks, api, context, types) and nginx/
+      also created. `python3 -c "import app"` succeeds from api/ directory.'
+    completion_signoff_by: Archie
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -304,7 +361,7 @@ tasks:
     description: Create api/requirements.txt (or pyproject.toml with optional groups)
       listing all runtime and development dependencies with pinned major versions.
     priority: high
-    completed: false
+    completed: true
     parent_id: rufus-brother
     context: "Architecture ref: ARCH-OVERVIEW §1 (tech stack), ARCH-PRESENTATION §2\
       \ (passlib, jose), ARCH-INFRASTRUCTURE §1.\n\nRuntime dependencies (minimum\
@@ -323,9 +380,23 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:42:50.525243'
     updated_at: '2026-04-01T12:42:50.525248'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T13:42:09.867220'
+    completion_report: 'api/requirements.txt — 13 pinned runtime dependencies with
+      upper-bound version constraints: fastapi, uvicorn[standard], pydantic, pydantic-settings,
+      sqlalchemy[asyncio], psycopg[binary] (async psycopg3), psycopg2-binary (sync
+      Alembic path), alembic, httpx, apscheduler, passlib[bcrypt], python-jose[cryptography],
+      structlog.
+
+
+      api/requirements-dev.txt — 7 dev/test dependencies: pytest>=8, pytest-asyncio,
+      pytest-cov, anyio[trio], respx, factory-boy, httpx. Not included in the production
+      Docker image.
+
+
+      Gap closed during Phase 1 review: psycopg2-binary added (hard blocker for Phase
+      6 Alembic sync migrations); pydantic declared explicitly; structlog added for
+      structured logging.'
+    completion_signoff_by: Archie
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -336,7 +407,7 @@ tasks:
       bridge network, the postgres_data named volume, health checks, and dependency
       ordering. This is the single-command deployment entry point.
     priority: high
-    completed: false
+    completed: true
     parent_id: rufus-brother
     context: "Architecture ref: ARCH-OVERVIEW §1 (context diagram). Requirements:\
       \ DEPLOY-REQ-001–020, DEPLOY-REQ-035–040, SEC-REQ-049–054.\n\nService: postgres\n\
@@ -362,9 +433,16 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:43:03.707936'
     updated_at: '2026-04-01T12:43:03.707942'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T13:42:20.655180'
+    completion_report: 'docker-compose.yml at repo root. Three services: postgres
+      (postgres:16.3-alpine, pg_isready healthcheck, interval 10s/start_period 30s/retries
+      5, postgres port NOT exposed), api (custom build, depends_on postgres condition:
+      service_healthy, wget healthcheck interval 30s/start_period 60s, json-file logging
+      50m/5 files), frontend (custom build, ${FRONTEND_HTTP_PORT:-80}:80, depends_on
+      api, wget healthcheck). delivery_network bridge network. postgres_data named
+      volume with driver: local. restart: unless-stopped on all three services. `docker
+      compose config` validates without errors.'
+    completion_signoff_by: Archie
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -375,7 +453,7 @@ tasks:
       Both must produce minimal runtime images with no build artefacts or secrets
       included.
     priority: high
-    completed: false
+    completed: true
     parent_id: rufus-brother
     context: "Architecture ref: ARCH-PRESENTATION §3 (startup), ARCH-OVERVIEW §1.\
       \ Requirements: DEPLOY-REQ-006–013, SEC-REQ-049–052.\n\napi/Dockerfile:\n  Stage\
@@ -399,9 +477,25 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:43:15.990529'
     updated_at: '2026-04-01T12:43:15.990532'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T13:42:32.512185'
+    completion_report: 'api/Dockerfile — two-stage build. Stage 1 (builder): python:3.12-slim,
+      creates /opt/venv, pip installs requirements.txt --no-cache-dir. Stage 2 (runtime):
+      python:3.12-slim, copies venv, copies alembic.ini/alembic//app//entrypoint.sh,
+      creates appgroup+appuser (non-root, SEC-REQ-049), chmod +x entrypoint.sh, USER
+      appuser, EXPOSE 8000, ENTRYPOINT ["./entrypoint.sh"]. .env is not COPY''d. api/.dockerignore
+      — excludes .env, .env.*, __pycache__, *.py[cod], tests/, .git/, .venv/, .pytest_cache/,
+      .coverage, htmlcov/, editor artefacts, OS files.
+
+
+      frontend/Dockerfile — placeholder (nginx:alpine serving static public/ via nginx.conf);
+      replaced with multi-stage Node/Vite build when React frontend is implemented.
+      frontend/.dockerignore — excludes node_modules/, dist/, .vite/, .env files,
+      .git/, editor artefacts.
+
+
+      Gap closed during Phase 1 review: EXPOSE 8000 added; both .dockerignore files
+      created (security requirement — prevents .env from entering build context).'
+    completion_signoff_by: Archie
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -412,7 +506,7 @@ tasks:
       seeds the database, and launches Uvicorn in the correct order. Any failure aborts
       the container start.
     priority: high
-    completed: false
+    completed: true
     parent_id: rufus-brother
     context: "Architecture ref: ARCH-OVERVIEW §6 (startup sequence). Requirements:\
       \ DEPLOY-REQ-021–025, DM-MIG-001.\n\nScript content (strict order — DEPLOY-REQ-021):\n\
@@ -432,9 +526,14 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:43:27.748134'
     updated_at: '2026-04-01T12:43:27.748138'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T13:42:40.534552'
+    completion_report: 'api/entrypoint.sh — #!/bin/sh with set -e (fail-fast, DEPLOY-REQ-022).
+      Strict order: (1) alembic upgrade head, (2) python -m app.seed, (3) exec uvicorn
+      app.main:app --host 0.0.0.0 --port 8000 --workers 1 --no-access-log. All acceptance
+      criteria met: set -e present, --workers 1 present (APScheduler singleton, DEPLOY-REQ-023),
+      alembic before seed before uvicorn. exec ensures Uvicorn receives OS signals
+      directly (clean shutdown).'
+    completion_signoff_by: Archie
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -445,7 +544,7 @@ tasks:
       the alembic/ directory structure. The env.py is stubbed here and completed in
       Phase 6 once ORM models exist.
     priority: high
-    completed: false
+    completed: true
     parent_id: rufus-brother
     context: "Architecture ref: ARCH-INFRASTRUCTURE §2.3 (Alembic config). Requirements:\
       \ DM-MIG-001–003.\n\nRun from api/:\n  alembic init alembic\n\nConfigure alembic.ini:\n\
@@ -460,9 +559,25 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:43:37.894845'
     updated_at: '2026-04-01T12:43:37.894848'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T13:42:52.395847'
+    completion_report: 'alembic.ini — script_location=alembic, sqlalchemy.url intentionally
+      omitted (set programmatically in env.py from app.config at runtime). Standard
+      loggers for root/sqlalchemy/alembic configured.
+
+
+      alembic/env.py (stub) — imports settings from app.config, sets sqlalchemy.url
+      from settings.DATABASE_URL, target_metadata=None (placeholder, completed in
+      task 6.1 once ORM Base exists). Implements run_migrations_offline() and run_migrations_online()
+      using async_engine_from_config. Note: env.py will be rewritten in task 6.1 to
+      use settings.sync_database_url (psycopg2 sync driver) per the task spec — the
+      async stub approach is a valid interim state.
+
+
+      alembic/versions/ — empty directory, ready for first migration in Phase 6.
+
+
+      alembic/script.py.mako — standard Alembic migration template.'
+    completion_signoff_by: Archie
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -473,7 +588,7 @@ tasks:
       a minimal .env.example stub with the essential variable names. The complete,
       documented .env.example is produced in Phase 7 once all layers are known.
     priority: medium
-    completed: false
+    completed: true
     parent_id: rufus-brother
     context: "Requirements: SEC-REQ-045–046, DEPLOY-REQ-048.\n\n.gitignore must include:\n\
       \  .env, .env.local, .env.*.local\n  __pycache__/, *.pyc, *.pyo\n  .pytest_cache/,\
@@ -490,9 +605,26 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:43:51.335508'
     updated_at: '2026-04-01T12:43:51.335512'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T13:43:04.819989'
+    completion_report: '.gitignore — covers: .env / *.env.local (secrets), __pycache__
+      / *.py[cod] / *$py.class (byte-code), *.egg-info / .eggs / dist / build / *.egg
+      / .venv / venv (packaging), .pytest_cache / .coverage / .coverage.* / htmlcov/
+      (test artefacts), node_modules / frontend/dist (Node), .vscode / .idea / *.swp
+      / *.swo (IDE), .DS_Store / Thumbs.db (OS), docker-compose.override.yml, .agent_c/,
+      .scratch/ (local working notes).
+
+
+      .env.example — comprehensive stub covering all variable groups: Database (POSTGRES_USER,
+      POSTGRES_PASSWORD, POSTGRES_DB, DATABASE_URL), Parcel API (PARCEL_API_KEY, commented
+      POLL_* defaults), Authentication (JWT_SECRET_KEY, commented token TTL and bcrypt
+      defaults, COOKIE_SECURE, TRUST_PROXY_HEADERS), First-run admin (ADMIN_USERNAME,
+      ADMIN_PASSWORD with removal warning), Frontend (FRONTEND_HTTP_PORT), HTTPS (HTTPS_ENABLED),
+      Application (ENVIRONMENT). All sensitive fields have empty values or comments.
+
+
+      Gap closed during Phase 1 review: .pytest_cache/, .coverage, .coverage.*, htmlcov/,
+      .eggs/, .scratch/ added to .gitignore.'
+    completion_signoff_by: Archie
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -503,7 +635,7 @@ tasks:
       status normalisation logic. These are pure Python enums with pure functions
       — no side effects, no external imports, deterministic for all integer inputs.
     priority: high
-    completed: false
+    completed: true
     parent_id: gabriel-motif
     context: "Architecture ref: ARCH-DOMAIN §3. Requirements: NORM-REQ-001–014.\n\n\
       File: app/domain/value_objects/semantic_status.py\n  SemanticStatus(str, Enum)\
@@ -530,9 +662,36 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:44:06.304216'
     updated_at: '2026-04-01T12:44:06.304220'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T13:37:32.738752'
+    completion_report: 'Implemented app/domain/value_objects/semantic_status.py and
+      app/domain/value_objects/lifecycle_group.py.
+
+
+      SemanticStatus(str, Enum) — 10 values with str mixin for JSON serialisability.
+
+      PARCEL_CODE_TO_SEMANTIC dict — exact 9-entry mapping from ARCH-DOMAIN §3.1 (codes
+      0–8).
+
+      normalize_status() — dict.get() with UNKNOWN sentinel; never raises for any
+      int input (NORM-REQ-010); 2-branch structure ready for 100% coverage (NORM-REQ-012).
+
+
+      LifecycleGroup(str, Enum) — 3 values (ACTIVE, ATTENTION, TERMINAL).
+
+      SEMANTIC_TO_LIFECYCLE dict — all 10 SemanticStatus values explicitly mapped
+      per ARCH-DOMAIN §3.2.
+
+      get_lifecycle_group() — dict.get() with ATTENTION default; never raises for
+      any SemanticStatus (NORM-REQ-011); ready for 100% branch coverage.
+
+
+      app/domain/value_objects/__init__.py — exports all 6 public symbols.
+
+
+      Verified: normalize_status(0–8) all correct; normalize_status(-1, 9, 99, 1000,
+      -999) all return UNKNOWN. All 10 lifecycle mappings confirmed correct. Zero
+      framework imports.'
+    completion_signoff_by: Archie
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -543,7 +702,7 @@ tasks:
       plain data containers — no SQLAlchemy metadata, no FastAPI annotations, no ORM
       relationships. They are the truth about the business model.
     priority: high
-    completed: false
+    completed: true
     parent_id: gabriel-motif
     context: "Architecture ref: ARCH-DOMAIN §2. Requirements: DM-BR-001–025, SEC-REQ-007.\n\
       \nFile: app/domain/entities/delivery.py — Delivery dataclass\n  Fields (exact\
@@ -586,9 +745,42 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:44:27.161233'
     updated_at: '2026-04-01T12:44:27.161237'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T13:37:45.060122'
+    completion_report: 'Implemented all 5 domain entity files.
+
+
+      app/domain/entities/delivery.py — Delivery @dataclass with all 15 fields. last_raw_response
+      uses field(default=None). Docstring documents all key invariants (DM-BR-001,
+      DM-BR-004, DM-BR-005, DM-BR-021, DM-BR-024, DM-BR-025). Field names match ARCH-DOMAIN
+      §2.1 exactly.
+
+
+      app/domain/entities/delivery_event.py — DeliveryEvent @dataclass with 8 fields.
+      Docstring explicitly documents that event_date_raw is NEVER parsed (DM-BR-009,
+      DM-BR-025) and the deduplication fingerprint (DM-BR-007).
+
+
+      app/domain/entities/status_history.py — StatusHistory @dataclass(frozen=True)
+      — Python-level immutability enforced (DM-BR-012). poll_log_id defaults to None.
+      Docstring clarifies detected_at is poller time, not carrier time (DM-BR-013).
+
+
+      app/domain/entities/user.py — User @dataclass with __repr__ override that explicitly
+      omits password_hash. Documents case-sensitivity (SEC-REQ-007), token_version
+      GAP-001, and no-hard-delete invariant (DM-BR-017).
+
+
+      app/domain/entities/poll_log.py — PollLog @dataclass + PollOutcome(str, Enum)
+      with 4 values. All counter fields default to None. Docstring documents the IN_PROGRESS
+      → NULL completed_at invariant (DM-BR-018, DM-BR-019).
+
+
+      app/domain/entities/__init__.py — exports all 6 public symbols.
+
+
+      Verified: User repr hides password_hash. StatusHistory assignment raises FrozenInstanceError.
+      All imports use only stdlib (dataclasses, datetime, enum, typing, uuid).'
+    completion_signoff_by: Archie
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -600,7 +792,7 @@ tasks:
       Application layer depends only on these; infrastructure provides the concrete
       implementations.
     priority: high
-    completed: false
+    completed: true
     parent_id: gabriel-motif
     context: "Architecture ref: ARCH-DOMAIN §4. Requirements: POLL-REQ-015, API-REQ-012,\
       \ API-REQ-014, DM-BR-007, SEC-REQ-021.\n\nFile: app/domain/repositories/abstract_delivery_repository.py\n\
@@ -636,9 +828,38 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:44:45.400132'
     updated_at: '2026-04-01T12:44:45.400136'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T13:37:57.661784'
+    completion_report: 'Implemented all 3 repository ABC files.
+
+
+      app/domain/repositories/abstract_delivery_repository.py — AbstractDeliveryRepository(ABC)
+      with 9 @abstractmethod methods: get_snapshot, get_by_id, list_filtered, create,
+      update, create_event, get_events_for_delivery, create_status_history, get_status_history_for_delivery.
+      DeliveryFilterParams imported under TYPE_CHECKING guard to avoid runtime circular
+      dependency with Application layer (from __future__ import annotations ensures
+      annotations are strings at runtime). Docstrings document POLL-REQ-015 (no N+1
+      snapshot), DM-BR-007 (ON CONFLICT DO NOTHING), API-REQ-012 (NULLS LAST), SEC-REQ-058
+      (parameterised LIKE), API-REQ-028 (page beyond total = empty list).
+
+
+      app/domain/repositories/abstract_user_repository.py — AbstractUserRepository(ABC)
+      with 6 @abstractmethod methods: get_by_username (case-sensitive, SEC-REQ-007),
+      get_by_id, update_last_login, increment_token_version (atomic UPDATE RETURNING,
+      SEC-REQ-021), get_user_count, create.
+
+
+      app/domain/repositories/abstract_poll_log_repository.py — AbstractPollLogRepository(ABC)
+      with 5 @abstractmethod methods: create_in_progress, complete (9-param signature),
+      get_recent, get_last_successful, count_consecutive_errors. Docstring on count_consecutive_errors
+      documents POLL-REQ-036 degradation threshold.
+
+
+      app/domain/repositories/__init__.py — exports all 3 ABC classes.
+
+
+      Verified: All 3 classes raise TypeError when instantiated directly. Zero SQLAlchemy/FastAPI/httpx
+      imports. isinstance checks pass against domain entities only.'
+    completion_signoff_by: Archie
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -649,7 +870,7 @@ tasks:
       rule violations independent of delivery mechanism — no HTTP status codes, no
       framework imports.
     priority: high
-    completed: false
+    completed: true
     parent_id: gabriel-motif
     context: "Architecture ref: ARCH-DOMAIN §5. Requirements: API-REQ-006 (no username\
       \ enumeration), SEC-REQ-008, NORM-REQ-005–006.\n\nFile: app/domain/exceptions.py\
@@ -671,9 +892,45 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:44:58.191200'
     updated_at: '2026-04-01T12:44:58.191204'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T13:38:09.817311'
+    completion_report: 'Implemented app/domain/exceptions.py with all 8 exception
+      classes.
+
+
+      DomainError(Exception) — common base for all domain exceptions.
+
+      DeliveryNotFoundError(DomainError) — stores identifier: str; message includes
+      identifier.
+
+      UserNotFoundError(DomainError) — stores identifier: str; docstring warns about
+      masking to 401 to prevent enumeration (SEC-REQ-016).
+
+      InvalidCredentialsError(DomainError) — no-arg constructor; generic "Invalid
+      credentials" message; docstring explains why specificity is withheld (API-REQ-006,
+      SEC-REQ-008).
+
+      AccountDisabledError(DomainError) — no-arg constructor.
+
+      TokenVersionMismatchError(DomainError) — no-arg constructor; "Token has been
+      invalidated" message.
+
+      InvalidStatusCodeError(DomainError) — stores code: int; message includes the
+      code; reserved for explicit validation, not raised during normal polling.
+
+      AnomalousStatusTransitionError(DomainError) — stores tracking_number: str, from_status:
+      SemanticStatus, to_status: SemanticStatus; rich message includes both statuses;
+      docstring explains it is caught + logged WARNING but transition is still persisted
+      (NORM-REQ-005–006).
+
+
+      No HTTP status codes anywhere. No FastAPI/httpx/SQLAlchemy imports. Only stdlib
+      + SemanticStatus from domain value objects.
+
+
+      Verified: InvalidCredentialsError message is identical for both "user not found"
+      and "wrong password" scenarios. AnomalousStatusTransitionError stores from_status
+      and to_status attributes for structured logging.'
+    completion_signoff_by: Archie
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -685,7 +942,7 @@ tasks:
       These are the typed contracts between the application layer and its callers
       and delegates.'
     priority: high
-    completed: false
+    completed: true
     parent_id: money-joshua
     context: "Architecture ref: ARCH-APPLICATION §2. Requirements: API-REQ-010–015,\
       \ API-REQ-026–028, NORM-REQ-003–004.\n\nFile: app/application/dtos/auth_dtos.py\n\
@@ -720,9 +977,15 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:45:16.978007'
     updated_at: '2026-04-01T12:45:16.978012'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T13:55:59.615750'
+    completion_report: 'Implemented all 3 DTO files and __init__.py: auth_dtos.py
+      (LoginCredentialsDTO, AccessTokenClaimsDTO, RefreshTokenClaimsDTO, AuthTokensDTO),
+      delivery_dtos.py (DeliveryFilterParams with include_terminal=False default,
+      DeliveryEventDTO, StatusHistoryEntryDTO, DeliverySummaryDTO with lifecycle_group
+      field, DeliveryDetailDTO, DeliveryListDTO), system_dtos.py (HealthDatabaseDTO,
+      HealthPollingDTO, HealthDTO, CarrierDTO, CarrierListDTO, ParcelEventDTO, ParcelDeliveryDTO).
+      All pydantic BaseModel. No framework imports.'
+    completion_signoff_by: Archie
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -733,7 +996,7 @@ tasks:
       the application layer needs to call without importing their concrete implementations:
       the Parcel API client, the carrier cache, and the APScheduler state query.'
     priority: high
-    completed: false
+    completed: true
     parent_id: money-joshua
     context: "Architecture ref: ARCH-APPLICATION §3. Requirements: POLL-REQ-011–014,\
       \ API-REQ-018–020.\n\nFile: app/application/services/interfaces.py (or app/application/services/\
@@ -755,9 +1018,13 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:45:29.657122'
     updated_at: '2026-04-01T12:45:29.657126'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T13:56:11.414031'
+    completion_report: 'Implemented app/application/services/interfaces.py and __init__.py.
+      Four ABCs: AbstractParcelAPIClient (get_deliveries, get_carriers), AbstractCarrierCache
+      (synchronous get_carriers, async refresh), AbstractSchedulerState (is_running,
+      get_next_poll_at), AbstractDBHealthChecker (async check → HealthDatabaseDTO).
+      All @abstractmethod. No httpx, apscheduler, fastapi imports.'
+    completion_signoff_by: Archie
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -768,7 +1035,7 @@ tasks:
       a single async execute() method. The login case implements constant-time dummy
       verification to prevent username enumeration timing attacks.
     priority: high
-    completed: false
+    completed: true
     parent_id: money-joshua
     context: "Architecture ref: ARCH-APPLICATION §4.1–4.3. Requirements: SEC-REQ-007–008,\
       \ SEC-REQ-017, API-REQ-006–009.\n\nFile: app/application/use_cases/auth/authenticate_user.py\n\
@@ -800,9 +1067,15 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:45:45.327225'
     updated_at: '2026-04-01T12:45:45.327228'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T13:56:11.543842'
+    completion_report: 'Implemented 3 auth use case files + __init__.py. AuthenticateUserUseCase:
+      dummy verify fires when username not found (lazy _dummy_hash() via lru_cache
+      avoids import-time side effects), wrong password raises InvalidCredentialsError,
+      disabled account raises AccountDisabledError, update_last_login called on success.
+      RefreshAccessTokenUseCase: checks user exists, is_active, and token_version
+      match. LogoutUserUseCase: calls increment_token_version atomically; DB errors
+      propagate.'
+    completion_signoff_by: Archie
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -813,7 +1086,7 @@ tasks:
       orchestrations: fetch from repo, derive lifecycle_group on each delivery, map
       to output DTOs.'
     priority: high
-    completed: false
+    completed: true
     parent_id: money-joshua
     context: "Architecture ref: ARCH-APPLICATION §4.4–4.5. Requirements: API-REQ-010–015,\
       \ NORM-REQ-003–004.\n\nFile: app/application/use_cases/deliveries/get_deliveries.py\n\
@@ -842,9 +1115,14 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:45:59.402391'
     updated_at: '2026-04-01T12:45:59.402397'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T13:56:27.835974'
+    completion_report: 'Implemented get_deliveries.py and get_delivery_detail.py +
+      __init__.py. GetDeliveriesUseCase: calls list_filtered, derives lifecycle_group
+      via get_lifecycle_group() for each item (never stored), maps to DeliverySummaryDTO,
+      computes pages=ceil(total/page_size). GetDeliveryDetailUseCase: raises DeliveryNotFoundError
+      when delivery absent, fetches events and history, derives lifecycle_group, maps
+      all to DeliveryDetailDTO including event and history sub-DTOs.'
+    completion_signoff_by: Archie
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -855,7 +1133,7 @@ tasks:
       This is the heart of the service — it coordinates the Parcel API call, change
       detection against the DB snapshot, transactional writes, and poll log finalisation.'
     priority: high
-    completed: false
+    completed: true
     parent_id: money-joshua
     context: "Architecture ref: ARCH-APPLICATION §4.6 (full 4-phase spec), ARCH-OVERVIEW\
       \ §7.1 (data flow). Requirements: POLL-REQ-003–036.\n\nFile: app/application/use_cases/polling/poll_and_sync.py\n\
@@ -911,9 +1189,17 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:46:26.564028'
     updated_at: '2026-04-01T12:46:26.564035'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T13:56:27.954775'
+    completion_report: 'Implemented poll_and_sync.py + __init__.py. Full 4-phase orchestrator:
+      Phase 1 creates IN_PROGRESS poll log and loads snapshot; Phase 2 calls parcel_client.get_deliveries()
+      with specific handling for RateLimitError (WARNING), AuthError (CRITICAL), ServerError
+      (ERROR); Phase 3 iterates deliveries sequentially with per-delivery error isolation
+      (counters.errors++, continue), handles NEW deliveries (create + initial StatusHistory
+      with prev=None + events), EXISTING deliveries (status change detection, anomalous
+      terminal transition logged WARNING but update persisted, event upsert with new_events
+      counter, full mutable field update including last_seen_at); Phase 4 finalises
+      poll log in separate transaction. Use case never raises.'
+    completion_signoff_by: Archie
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -924,7 +1210,7 @@ tasks:
       to never raise — they return structured DTOs indicating degraded or unavailable
       state rather than propagating exceptions to the caller.
     priority: medium
-    completed: false
+    completed: true
     parent_id: money-joshua
     context: "Architecture ref: ARCH-APPLICATION §4.7–4.8. Requirements: API-REQ-016–020,\
       \ POLL-REQ-035–036.\n\nFile: app/application/use_cases/system/get_health.py\n\
@@ -953,9 +1239,15 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:46:42.543987'
     updated_at: '2026-04-01T12:46:42.543992'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T13:56:36.280872'
+    completion_report: 'Implemented get_health.py and get_carriers.py + __init__.py.
+      GetHealthUseCase: DB check wrapped in asyncio.wait_for(3s timeout), never raises
+      (returns disconnected DTO on any failure); queries poll_log_repo for recent/last-success/consecutive-errors;
+      queries scheduler_state for is_running/next_poll_at; derives overall status
+      (unhealthy if DB disconnected or scheduler stopped, degraded if consecutive_errors
+      >= 3, healthy otherwise). GetCarriersUseCase: single-line delegate to carrier_cache.get_carriers()
+      — no outbound HTTP call possible.'
+    completion_signoff_by: Archie
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -967,7 +1259,7 @@ tasks:
       as-is. Polling exceptions form a hierarchy used by the infrastructure Parcel
       client and caught by the polling use case.
     priority: high
-    completed: false
+    completed: true
     parent_id: money-joshua
     context: "Architecture ref: ARCH-APPLICATION §5. Requirements: POLL-REQ-024–031.\n\
       \nFile: app/application/exceptions.py\n  ApplicationError(Exception) — base\n\
@@ -990,9 +1282,12 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:46:56.649972'
     updated_at: '2026-04-01T12:46:56.649979'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T13:55:59.502829'
+    completion_report: 'Implemented app/application/exceptions.py. Hierarchy: ApplicationError
+      → ParcelAPIError → ParcelRateLimitError, ParcelAuthError, ParcelServerError,
+      ParcelResponseError; plus DatabaseUnavailableError. ParcelServerError stores
+      status_code attribute. No FastAPI/SQLAlchemy imports. All imports clean.'
+    completion_signoff_by: Archie
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -1003,7 +1298,7 @@ tasks:
       the shared DeclarativeBase. This is the foundation that all ORM models and repository
       implementations depend on.
     priority: high
-    completed: false
+    completed: true
     parent_id: chamber-open
     context: "Architecture ref: ARCH-INFRASTRUCTURE §2.1–2.2. Requirements: DEPLOY-REQ-004\
       \ (pool_pre_ping for Docker restarts).\n\nFile: app/infrastructure/database/engine.py\n\
@@ -1030,9 +1325,15 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:47:10.657687'
     updated_at: '2026-04-01T12:47:10.657691'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T14:30:01.013692'
+    completion_report: 'app/infrastructure/database/engine.py: create_async_engine
+      with pool_pre_ping=True, async_sessionmaker with expire_on_commit=False, and
+      get_async_session() FastAPI DI dependency. app/infrastructure/database/models/__init__.py:
+      DeclarativeBase (Base) defined; imports all 5 ORM models to populate Base.metadata.
+      app/infrastructure/database/health_checker.py: SQLAlchemyHealthChecker implements
+      AbstractDBHealthChecker via SELECT 1 with latency measurement. All acceptance
+      criteria met.'
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -1044,7 +1345,7 @@ tasks:
       table constraints, indexes, and relationship declarations that domain entities
       must never see.
     priority: high
-    completed: false
+    completed: true
     parent_id: chamber-open
     context: "Architecture ref: ARCH-INFRASTRUCTURE §3. Requirements: DM-BR-001–025,\
       \ DM-MIG-003.\n\nFile: app/infrastructure/database/models/delivery_orm.py —\
@@ -1095,11 +1396,20 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:47:34.766913'
     updated_at: '2026-04-01T12:47:34.766917'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T14:30:10.287751'
+    completion_report: 'All 5 ORM models implemented using SQLAlchemy 2.0 Mapped/mapped_column
+      syntax. DeliveryORM: uq_delivery_tracking UniqueConstraint, JSONB last_raw_response,
+      lazy="raise" on events and status_history relationships, all 4 indexes. DeliveryEventORM:
+      uq_event_fingerprint UniqueConstraint (deduplication). StatusHistoryORM: delivery_id
+      + poll_log_id FK constraints. UserORM: token_version INTEGER NOT NULL DEFAULT
+      1 (GAP-001), password_hash excluded from __repr__. PollLogORM: ck_poll_log_outcome
+      CheckConstraint. Bug fixed: TIMESTAMPTZ replaced with TIMESTAMP(timezone=True)
+      throughout all 5 models (TIMESTAMPTZ is not exported by sqlalchemy.dialects.postgresql).
+      Base.metadata.tables contains all 5 tables when models imported.'
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
-    lessons_learned: []
+    lessons_learned:
+    - burma
     active: false
   apple-cloud:
     id: apple-cloud
@@ -1109,7 +1419,7 @@ tasks:
       both sides of the ORM/entity boundary. They are pure transformation logic —
       no DB calls, no business logic.
     priority: high
-    completed: false
+    completed: true
     parent_id: chamber-open
     context: "Architecture ref: ARCH-INFRASTRUCTURE §4. This is the critical seam\
       \ that keeps domain entities clean of SQLAlchemy metadata.\n\nPattern (each\
@@ -1136,9 +1446,17 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:47:48.417851'
     updated_at: '2026-04-01T12:47:48.417853'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T14:30:18.531268'
+    completion_report: 'All 5 mappers implemented with to_domain() and to_orm() static
+      methods. DeliveryMapper: SemanticStatus(orm.semantic_status) enum coercion on
+      read; .value on write. DeliveryEventMapper: straight field mapping, no enum
+      conversion. StatusHistoryMapper: Optional[SemanticStatus] for previous_semantic_status
+      (nullable field). UserMapper: id=0 sentinel pattern for new unsaved users (ORM
+      IDENTITY column). PollLogMapper: PollOutcome(orm.outcome) enum coercion on read.
+      app/infrastructure/mappers/__init__.py exports all 5 mappers. Import validation
+      confirmed: DeliveryMapper.to_domain() returns a Delivery dataclass (not SQLAlchemy
+      object). No DB session required.'
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -1150,7 +1468,7 @@ tasks:
       repository contains the most complexity: dynamic query building for list_filtered,
       ON CONFLICT DO NOTHING for events, and the snapshot query.'
     priority: high
-    completed: false
+    completed: true
     parent_id: chamber-open
     context: "Architecture ref: ARCH-INFRASTRUCTURE §5. Requirements: POLL-REQ-015,\
       \ POLL-REQ-018, API-REQ-011–012, DM-BR-007, SEC-REQ-056–058, SEC-REQ-021.\n\n\
@@ -1192,9 +1510,26 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:48:10.356693'
     updated_at: '2026-04-01T12:48:10.356696'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T14:30:34.855109'
+    completion_report: 'SQLAlchemyDeliveryRepository: get_snapshot() — single SELECT
+      tracking_number, carrier_code, id query (POLL-REQ-015). list_filtered() — dynamic
+      query builder with TERMINAL exclusion via not_in(), lifecycle_group and semantic_status
+      filters, carrier_code filter, parameterised ilike() search on description +
+      tracking_number (SEC-REQ-058, no string interpolation), count subquery for total,
+      asc(col).nulls_last()/desc(col).nulls_last() for timestamp_expected (API-REQ-012),
+      offset+limit pagination. create_event() — pg_insert().on_conflict_do_nothing()
+      on uq_event_fingerprint; returns event if rowcount==1, None if rowcount==0 (DM-BR-007).
+      create(), update(), create_status_history(), get_by_id(), get_events_for_delivery()
+      (seq ASC), get_status_history_for_delivery() (detected_at ASC). SQLAlchemyUserRepository:
+      get_by_username() case-sensitive no lower() (SEC-REQ-007); increment_token_version()
+      single UPDATE...RETURNING with flush() (SEC-REQ-021); get_by_id(), update_last_login(),
+      get_user_count(), create(). SQLAlchemyPollLogRepository: create_in_progress()
+      INSERT with PollOutcome.IN_PROGRESS + flush(); complete() UPDATE...then re-fetch;
+      get_recent() newest-first; get_last_successful(); count_consecutive_errors()
+      scans up to 20 rows newest-first stopping at SUCCESS (POLL-REQ-036). All 3 classes
+      pass issubclass() ABC contract check. app/infrastructure/database/repositories/__init__.py
+      exports all 3.'
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -1206,7 +1541,7 @@ tasks:
       shared AsyncClient (keep-alive), implements the 3-retry exponential backoff,
       and never logs the API key.
     priority: high
-    completed: false
+    completed: true
     parent_id: chamber-open
     context: "Architecture ref: ARCH-INFRASTRUCTURE §6. Requirements: POLL-REQ-007–014,\
       \ POLL-REQ-024–028, POLL-REQ-033.\n\nFile: app/infrastructure/parcel_api/schemas.py\
@@ -1247,9 +1582,22 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:48:34.492528'
     updated_at: '2026-04-01T12:48:34.492532'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T14:30:47.267876'
+    completion_report: 'schemas.py: ParcelAPIEvent (event, date, location, additional
+      fields), ParcelAPIDelivery (all fields including Optional timestamp ints), ParcelAPIResponse
+      (success, deliveries, error_message). Field names match actual Parcel API response
+      (event→event_description, additional→additional_info mapping done in client).
+      client.py: ParcelAPIClient implements AbstractParcelAPIClient. _api_key stored
+      private, never logged. get_deliveries() retry loop: 4 attempts (0-3), RETRY_DELAYS=(15,60,120)s.
+      429→ParcelRateLimitError immediate (non-retryable); 401→ParcelAuthError immediate;
+      4xx→ParcelServerError non-retryable; 5xx→retry with WARNING log (attempt number
+      + delay, no api_key); network TransportError→retry. Invalid JSON→retry. success=false→ParcelResponseError
+      immediate. _parse_deliveries(): per-delivery ValidationError→WARNING+skip; timestamp_expected
+      Unix epoch→datetime.fromtimestamp(tz=timezone.utc); date strings verbatim (DM-BR-025);
+      raw_response=raw dict stored. get_carriers() for carrier cache refresh. Empty
+      deliveries list returned without error (POLL-REQ-014). All acceptance criteria
+      met.'
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -1260,7 +1608,7 @@ tasks:
       cache must serve stale data gracefully rather than erroring when the TTL has
       expired, and silently retain existing data when a refresh attempt fails.
     priority: medium
-    completed: false
+    completed: true
     parent_id: chamber-open
     context: "Architecture ref: ARCH-INFRASTRUCTURE §7. Requirements: API-REQ-019–020.\n\
       \nFile: app/infrastructure/parcel_api/carrier_cache.py — CarrierCache(AbstractCarrierCache):\n\
@@ -1287,9 +1635,18 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:48:49.751362'
     updated_at: '2026-04-01T12:48:49.751366'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T14:30:57.169902'
+    completion_report: 'CarrierCache implements AbstractCarrierCache. Takes AbstractParcelAPIClient
+      (not httpx.AsyncClient directly) — delegates to parcel_client.get_carriers().
+      _carriers: list[CarrierDTO] = [], _cached_at: Optional[datetime] = None, _CARRIER_CACHE_TTL_SECONDS
+      = 24*60*60. get_carriers() synchronous: returns ''unavailable'' if _cached_at
+      is None; computes age via datetime.now(tz=UTC) - _cached_at; returns ''fresh''
+      if age < TTL else ''stale''. NO outbound HTTP call (API-REQ-019). refresh()
+      async: calls parcel_client.get_carriers(), updates _carriers and _cached_at
+      on success; on any Exception logs WARNING and preserves existing cache — never
+      clears _carriers on failure (API-REQ-020). All 3 acceptance criteria verified:
+      unavailable before first refresh, stale after TTL, failed refresh retains data.'
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -1301,7 +1658,7 @@ tasks:
       Implement cold-start behaviour. Provide the APSchedulerStateAdapter for health
       queries.
     priority: high
-    completed: false
+    completed: true
     parent_id: chamber-open
     context: "Architecture ref: ARCH-INFRASTRUCTURE §8. Requirements: POLL-REQ-001–005,\
       \ POLL-REQ-032, POLL-REQ-002, POLL-REQ-003–004.\n\nFile: app/infrastructure/scheduler/polling_scheduler.py\n\
@@ -1337,9 +1694,22 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:49:08.520676'
     updated_at: '2026-04-01T12:49:08.520680'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T14:31:08.842077'
+    completion_report: 'PollingScheduler class implements AbstractSchedulerState (wraps
+      AsyncIOScheduler internally). Constructor takes parcel_client, interval_minutes=15,
+      jitter_seconds=30. start(): scheduler.add_job(func=self._run_poll_cycle, trigger=IntervalTrigger(minutes=...,
+      jitter=...), id=''poll_and_sync'', max_instances=1, coalesce=True, misfire_grace_time=60,
+      replace_existing=True); scheduler.start(); asyncio.create_task(_run_poll_cycle(),
+      name=''poll_and_sync_cold_start'') — cold-start is non-blocking (POLL-REQ-003).
+      shutdown(): scheduler.shutdown(wait=True) allows in-progress poll to complete
+      (POLL-REQ-002). is_running(): scheduler.running AND get_job(''poll_and_sync'')
+      is not None. get_next_poll_at(): returns job.next_run_time or None. _run_poll_cycle():
+      async with async_session_factory() as session → creates SQLAlchemyDeliveryRepository
+      + SQLAlchemyPollLogRepository → creates PollAndSyncUseCase → await use_case.execute().
+      Fresh session per cycle. Outer try/except logs any unhandled exception (PollAndSyncUseCase
+      never raises). All acceptance criteria met. Passes issubclass(PollingScheduler,
+      AbstractSchedulerState) check.'
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -1350,7 +1720,7 @@ tasks:
       All environment variable validation runs at import time — if any required secret
       is missing or invalid, the application refuses to start with a clear error message.
     priority: high
-    completed: false
+    completed: true
     parent_id: arizona-culture
     context: "Architecture ref: ARCH-PRESENTATION §2 (full Settings class spec). Requirements:\
       \ POLL-REQ-007–008, SEC-REQ-009–010, SEC-REQ-013–014, SEC-REQ-047–048, DEPLOY-REQ-048.\n\
@@ -1386,11 +1756,18 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:49:29.439922'
     updated_at: '2026-04-01T12:49:29.439926'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T14:52:01.182466'
+    completion_report: 'Rewrote app/config.py with full task-spec compliance: SecretStr
+      for PARCEL_API_KEY, JWT_SECRET_KEY, and ADMIN_PASSWORD; sync_database_url property
+      replacing postgresql+psycopg:// with postgresql+psycopg2://; POLL_INTERVAL_MINUTES
+      < 5 clamps to 5 with WARNING (not rejected); ENVIRONMENT field_validator normalises
+      to lowercase; SettingsConfigDict with env_file=".env". All acceptance criteria
+      verified: ValidationError on missing PARCEL_API_KEY, ValidationError on JWT_SECRET_KEY
+      < 32 chars, clamping works, sync_database_url replacement confirmed.'
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
-    lessons_learned: []
+    lessons_learned:
+    - vital
     active: false
   invent-engine:
     id: invent-engine
@@ -1400,7 +1777,7 @@ tasks:
       exact wire format of API requests and responses including timestamp serialisation
       format.
     priority: high
-    completed: false
+    completed: true
     parent_id: arizona-culture
     context: "Architecture ref: ARCH-PRESENTATION §4. Requirements: API-REQ-005, API-REQ-013,\
       \ API-REQ-026–028.\n\nFile: app/presentation/schemas/auth_schemas.py\n  LoginRequest(BaseModel):\
@@ -1436,9 +1813,17 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:49:48.911401'
     updated_at: '2026-04-01T12:49:48.911404'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T14:52:10.646086'
+    completion_report: 'Created 3 schema files + __init__.py: auth_schemas.py (LoginRequest,
+      AccessTokenResponse, LoginResponse, ErrorDetail, ErrorBody, ErrorResponse shared
+      envelope); delivery_schemas.py (DeliveryListQueryParams with page_size max=100,
+      all 5 response schemas with @field_serializer on every datetime field producing
+      "YYYY-MM-DDTHH:MM:SSZ" format, PaginatedDeliveryResponse, DeliveryDetailResponse);
+      system_schemas.py (DatabaseHealthSchema, PollingHealthSchema, HealthSchema,
+      HealthResponse, CarrierSchema, CarrierListSchema, CarrierListResponse). All
+      acceptance criteria met: Z-suffix ISO 8601 confirmed, page_size le=100 present,
+      DeliveryListQueryParams usable as Depends().'
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -1450,7 +1835,7 @@ tasks:
       component — all 6 validation steps must be present and failures must all return
       the same 401 response.
     priority: high
-    completed: false
+    completed: true
     parent_id: arizona-culture
     context: "Architecture ref: ARCH-PRESENTATION §5. Requirements: SEC-REQ-009–017,\
       \ API-REQ-001–004, SEC-REQ-025–027.\n\nFile: app/presentation/auth.py (or auth\
@@ -1485,9 +1870,19 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:50:08.852723'
     updated_at: '2026-04-01T12:50:08.852727'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T14:52:19.723867'
+    completion_report: 'Created app/presentation/auth.py. Token creation: create_access_token(user)
+      returns (signed_jwt, expires_in_seconds) with claims {sub, type="access", token_version,
+      iat, exp}; create_refresh_token(user) returns signed_jwt with type="refresh".
+      Validation: validate_access_token_claims() performs steps 1-4 (token present,
+      signature valid, not expired, type=="access") — all failures raise the single
+      UNAUTHORIZED constant (identical 401 body). get_refresh_token_claims() FastAPI
+      dependency reads refresh cookie, validates signature/expiry/type=="refresh",
+      returns RefreshTokenClaimsDTO. oauth2_scheme with auto_error=False. get_current_user
+      placed in dependencies.py to avoid circular imports (task spec permitted "auth
+      portion of dependencies.py"). All 6 failure modes tested: no token, bad signature,
+      expired, wrong type, inactive user, version mismatch all produce HTTP 401.'
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -1499,7 +1894,7 @@ tasks:
       is the architectural seam — the only place in the codebase where application
       interfaces and infrastructure implementations are explicitly linked.
     priority: high
-    completed: false
+    completed: true
     parent_id: arizona-culture
     context: "Architecture ref: ARCH-PRESENTATION §6. Requirements: SEC-REQ-025–027.\n\
       \nFile: app/presentation/dependencies.py\n\nSession provider:\n  async def get_async_session(request:\
@@ -1533,9 +1928,18 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:50:25.921012'
     updated_at: '2026-04-01T12:50:25.921016'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T14:52:29.156771'
+    completion_report: 'Created app/presentation/dependencies.py — the sole architectural
+      seam linking application interfaces to infrastructure implementations. Providers:
+      get_async_session (commits on success, rolls back on exception); get_delivery_repository,
+      get_user_repository, get_poll_log_repository (each returning concrete SQLAlchemy
+      impl fulfilling the ABC); get_carrier_cache and get_scheduler_state (reading
+      from app.state); get_current_user (full 6-step chain — steps 1-4 via validate_access_token_claims,
+      steps 5-6 with DB user lookup and token_version check); 7 use-case providers;
+      module-level _rate_limiter singleton with get_rate_limiter() accessor. No FastAPI
+      imports outside presentation/. app.dependency_overrides can replace any provider
+      for testing.'
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -1546,7 +1950,7 @@ tasks:
       and cookie issuance), refresh (cookie-based), and logout (cookie clearing and
       token version increment).'
     priority: high
-    completed: false
+    completed: true
     parent_id: arizona-culture
     context: "Architecture ref: ARCH-PRESENTATION §7.1. Requirements: API-REQ-006–009,\
       \ SEC-REQ-018–024, SEC-REQ-035–040.\n\nFile: app/presentation/routers/auth_router.py\n\
@@ -1581,9 +1985,18 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:50:44.504212'
     updated_at: '2026-04-01T12:50:44.504224'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T14:52:39.635695'
+    completion_report: 'Created app/presentation/routers/auth_router.py. POST /login:
+      _get_client_ip() reads X-Real-IP/X-Forwarded-For when TRUST_PROXY_HEADERS=true;
+      rate_limiter.check() before use case call; InvalidCredentialsError → 401 INVALID_CREDENTIALS
+      + record_failure(); AccountDisabledError → 403 ACCOUNT_DISABLED; success → reset()
+      + set httpOnly cookie (path=/api/auth, samesite=strict, max_age=days*86400,
+      secure=settings.COOKIE_SECURE); INFO log on success. POST /refresh: get_refresh_token_claims
+      dependency validates cookie; use case validates token_version; issues new access
+      token (refresh NOT rotated). POST /logout: requires valid Bearer token via Depends(get_current_user);
+      increments token_version; returns 204 with deleted cookie. All acceptance criteria
+      met.'
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -1594,7 +2007,7 @@ tasks:
       All deliveries endpoints require authentication via the get_current_user dependency.
       Health is public. Carriers require authentication.
     priority: high
-    completed: false
+    completed: true
     parent_id: arizona-culture
     context: "Architecture ref: ARCH-PRESENTATION §7.2–7.3. Requirements: API-REQ-010–020,\
       \ API-REQ-026–028.\n\nFile: app/presentation/routers/deliveries_router.py\n\n\
@@ -1630,9 +2043,18 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:51:03.338613'
     updated_at: '2026-04-01T12:51:03.338617'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T14:52:50.234849'
+    completion_report: 'Created app/presentation/routers/deliveries_router.py and
+      system_router.py plus routers/__init__.py. deliveries_router: GET / maps DeliveryListQueryParams
+      → DeliveryFilterParams, returns PaginatedDeliveryResponse (empty items on page-beyond-total,
+      not 404); GET /{delivery_id} with UUID type annotation (FastAPI auto-validates
+      → 422 on bad UUID), DeliveryNotFoundError → 404 with ErrorResponse envelope;
+      both require Depends(get_current_user). system_router: GET /health has NO auth
+      dependency, returns 503 only when status=="unhealthy" (200 for both healthy
+      and degraded), uses JSONResponse with model_dump(mode="json"); GET /carriers
+      requires auth, calls synchronous use_case.execute(). All acceptance criteria
+      verified.'
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -1643,7 +2065,7 @@ tasks:
       exception handlers, and the complete app factory with full lifespan startup/shutdown
       sequence. This brings all layers together into the running application.
     priority: high
-    completed: false
+    completed: true
     parent_id: arizona-culture
     context: "Architecture ref: ARCH-PRESENTATION §3, §8, ARCH-OVERVIEW §6. Requirements:\
       \ API-REQ-021–025, SEC-REQ-029–034, SEC-REQ-035–040, DEPLOY-REQ-021–023.\n\n\
@@ -1686,9 +2108,22 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:51:29.256467'
     updated_at: '2026-04-01T12:51:29.256471'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T14:53:03.341534'
+    completion_report: 'Created security_headers.py (BaseHTTPMiddleware adding X-Content-Type-Options:
+      nosniff, X-Frame-Options: DENY, X-XSS-Protection: 0, Referrer-Policy: strict-origin-when-cross-origin;
+      pops "server"/"Server" headers); rate_limiter.py (RateLimiter: sliding window
+      dict[ip, list[datetime]], WINDOW_SECONDS=900, MAX_FAILURES=10, asyncio.Lock,
+      check() raises HTTPException(429) with Retry-After header, record_failure(),
+      reset()); middleware/__init__.py. main.py: create_app() with lifespan; docs_url/redoc_url/openapi_url=None
+      in production; SecurityHeadersMiddleware always added; CORSMiddleware only in
+      development; RequestValidationError → 422 envelope; Exception catch-all → 500
+      with INTERNAL_ERROR (traceback logged, not returned); routers at /api/auth,
+      /api/deliveries, /api; lifespan: httpx.AsyncClient(verify=True) → ParcelAPIClient
+      → CarrierCache (initial refresh task) → PollingScheduler (carrier refresh job
+      registered on _scheduler before start()) → polling_scheduler.start() (cold-start
+      fires) → app.state; shutdown: scheduler.shutdown(wait=True) → aclose() → engine.dispose().
+      app = create_app() module-level for Uvicorn.'
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -1730,7 +2165,7 @@ tasks:
     completion_signoff_by: null
     requires_completion_signoff: 'true'
     lessons_learned: []
-    active: false
+    active: true
   imitate-classic:
     id: imitate-classic
     title: 6.2 — Initial Alembic migration (all 5 tables)
@@ -1782,7 +2217,7 @@ tasks:
       — every variable must have a comment explaining its purpose, allowed values,
       and security implications.
     priority: medium
-    completed: false
+    completed: true
     parent_id: lexicon-think
     context: "Architecture ref: ARCH-PRESENTATION §2 (all Settings fields). Requirements:\
       \ SEC-REQ-045–046, DEPLOY-REQ-048.\n\nSections to cover in .env.example:\n \
@@ -1817,9 +2252,15 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:52:19.879501'
     updated_at: '2026-04-01T12:52:19.879505'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T15:08:58.218308'
+    completion_report: Rewrote .env.example from the task 1.7 stub into a complete
+      operator reference. Every Settings field is covered with inline comments explaining
+      purpose, valid range, and security implications. ADMIN_PASSWORD has a prominent
+      !! IMPORTANT !! removal warning. POLL_INTERVAL_MINUTES includes the rate-limit
+      maths. JWT_SECRET_KEY shows both openssl and Python generation commands. VERSION
+      added as a commented optional override. All 1Password references preserved.
+      File is ready for `cp .env.example .env` as a valid starting point.
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -1830,7 +2271,7 @@ tasks:
       admin user. Called by entrypoint.sh after migrations. Must fail with a non-zero
       exit code if the database is empty but credentials are not configured.
     priority: high
-    completed: false
+    completed: true
     parent_id: lexicon-think
     context: "Architecture ref: ARCH-INFRASTRUCTURE §9 (seed script). Requirements:\
       \ DM-BR-014–016, DM-MIG-004, DEPLOY-REQ-026–028, SEC-REQ-001–005.\n\nFile: app/seed.py\
@@ -1864,9 +2305,15 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:52:37.197278'
     updated_at: '2026-04-01T12:52:37.197283'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T15:09:05.130257'
+    completion_report: Created api/app/seed.py. Idempotent — row-count check exits
+      0 on non-empty table. Validates ADMIN_USERNAME and ADMIN_PASSWORD present and
+      ≥12 chars, sys.exit(1) on failure. Hashes with bcrypt at settings.BCRYPT_ROUNDS.
+      Plaintext password cleared from scope immediately after hashing (SEC-REQ-061).
+      UserORM created with token_version=1 and explicit created_at. Logs WARNING post-creation
+      reminding operator to remove ADMIN_PASSWORD. Runnable via `python -m app.seed`
+      as called by entrypoint.sh.
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -1877,7 +2324,7 @@ tasks:
       HTTPS configuration. Nginx serves the React SPA, proxies /api/* to the FastAPI
       backend, forwards client IP headers, and adds security headers to all responses.
     priority: medium
-    completed: false
+    completed: true
     parent_id: lexicon-think
     context: "Architecture ref: ARCH-OVERVIEW §1 (context), ARCH-PRESENTATION §3.\
       \ Requirements: DEPLOY-REQ-029–034, SEC-REQ-031–034, SEC-REQ-041–044, ADR-005.\n\
@@ -1911,9 +2358,15 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:52:53.974648'
     updated_at: '2026-04-01T12:52:53.974653'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T15:09:11.254552'
+    completion_report: Updated frontend/nginx.conf with server_tokens off, X-Frame-Options
+      DENY, X-Content-Type-Options nosniff, Content-Security-Policy, and Referrer-Policy
+      headers on all responses. Created frontend/nginx-https.conf with HTTP→HTTPS
+      redirect (301), TLSv1.2+TLSv1.3, HSTS, and identical location blocks. HTTPS
+      config includes full activation instructions (Dockerfile COPY change, docker-compose
+      port 443 + cert volume mounts, .env flags). Both files satisfy DEPLOY-REQ-029–034
+      and SEC-REQ-031–034, SEC-REQ-040–044.
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -1925,7 +2378,7 @@ tasks:
       a test settings override that substitutes dummy secrets so tests never need
       real credentials.
     priority: medium
-    completed: false
+    completed: true
     parent_id: orient-dynasty
     context: "Architecture ref: ARCH-DOMAIN §7, ARCH-OVERVIEW §4 (test payoff section).\
       \ Requirements: NORM-REQ-012.\n\nDirectory structure:\n  tests/\n    conftest.py\
@@ -1955,9 +2408,15 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:53:10.363995'
     updated_at: '2026-04-01T12:53:10.363999'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T15:50:01.410809'
+    completion_report: 'Completed. Created the full test directory structure mirroring
+      the layer hierarchy: pyproject.toml with pytest config (asyncio_mode=auto, testpaths=["tests"],
+      --cov=app --cov-branch), root conftest.py with env bootstrap before any app
+      import, MockDeliveryRepository/MockUserRepository/MockPollLogRepository (full
+      in-memory ABC implementations), make_user() and make_delivery() entity factories,
+      all __init__.py files, and per-layer conftest.py files. pytest --co shows all
+      test files discoverable. pytest tests/unit/ runs with no database needed.'
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -1968,7 +2427,7 @@ tasks:
       functions are the highest-priority target — they require 100% branch coverage
       per NORM-REQ-012. No database, no HTTP client, no framework fixtures needed.
     priority: high
-    completed: false
+    completed: true
     parent_id: orient-dynasty
     context: "Architecture ref: ARCH-DOMAIN §7. Requirements: NORM-REQ-010–012.\n\n\
       File: tests/unit/domain/test_value_objects.py — CRITICAL COVERAGE REQUIREMENT:\n\
@@ -2001,11 +2460,21 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:53:27.129046'
     updated_at: '2026-04-01T12:53:27.129051'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T15:50:12.405432'
+    completion_report: 'Completed. tests/unit/domain/test_value_objects.py: 33 tests
+      covering all 9 known parcel codes (normalize_status), all 5 unknown code values
+      (NORM-REQ-010 never-raises), all 10 SemanticStatus→LifecycleGroup mappings,
+      dict completeness assertions, ACTIVE/TERMINAL/ATTENTION group membership. Both
+      functions show 0 Miss / 0 BrPart in --cov-branch report (100% branch coverage,
+      NORM-REQ-012 confirmed). test_entities.py: Delivery mutability, User.__repr__
+      hides password_hash, StatusHistory frozen=True, DeliveryEvent event_date_raw
+      verbatim, PollOutcome string values. test_exceptions.py: generic InvalidCredentialsError
+      message, AnomalousStatusTransitionError stores from/to statuses, all exception
+      hierarchy.'
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
-    lessons_learned: []
+    lessons_learned:
+    - mobile
     active: false
   nobel-memo:
     id: nobel-memo
@@ -2015,7 +2484,7 @@ tasks:
       for auth, polling phase transitions, partial failure recovery, and health degradation
       logic.'
     priority: high
-    completed: false
+    completed: true
     parent_id: orient-dynasty
     context: "Architecture ref: ARCH-APPLICATION §7. Requirements: SEC-REQ-008, POLL-REQ-024–031.\n\
       \nIn-memory mock pattern (defined in conftest.py):\n  class MockDeliveryRepository(AbstractDeliveryRepository):\n\
@@ -2050,9 +2519,23 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:53:49.101771'
     updated_at: '2026-04-01T12:53:49.101778'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T15:50:25.318816'
+    completion_report: 'Completed. 4 test files in tests/unit/application/. test_auth_use_cases.py:
+      dummy verify fires when user not found (patches _dummy_hash + passlib.hash.bcrypt.verify),
+      wrong-password and unknown-user raise same InvalidCredentialsError with same
+      message, inactive user raises AccountDisabledError, successful login calls update_last_login,
+      token_version mismatch raises TokenVersionMismatchError, logout calls increment_token_version.
+      All tests use mock patching to avoid passlib/bcrypt ≥4.0 compatibility issues.
+      test_delivery_use_cases.py: lifecycle_group derived at serialisation time (NORM-REQ-004),
+      page-beyond-total returns empty list not error (API-REQ-028), DeliveryNotFoundError
+      on missing UUID. test_poll_and_sync.py: new delivery has null-previous StatusHistory
+      (DM-BR-010), status change creates history entry, duplicate event returns None,
+      per-delivery failure continues remaining with PARTIAL outcome, 429 and 401 abort
+      with ERROR, empty list valid, anomalous TERMINAL→non-TERMINAL logged not rejected.
+      test_system_use_cases.py: degraded at ≥3 consecutive errors (POLL-REQ-036),
+      unhealthy when DB disconnected or scheduler not running, DB timeout returns
+      disconnected, GetCarriersUseCase.get_carriers is not async (API-REQ-019).'
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -2063,7 +2546,7 @@ tasks:
       test database. Test the repository implementations for correct SQL generation,
       the mapper round-trips, and the Parcel API client with mocked HTTP responses.
     priority: medium
-    completed: false
+    completed: true
     parent_id: orient-dynasty
     context: "Architecture ref: ARCH-INFRASTRUCTURE §10. Requirements: POLL-REQ-015,\
       \ DM-BR-007, SEC-REQ-058, API-REQ-012.\n\nTest DB setup (conftest.py for integration\
@@ -2100,9 +2583,19 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:54:09.346598'
     updated_at: '2026-04-01T12:54:09.346602'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T15:50:34.320551'
+    completion_report: 'Completed. tests/integration/test_mappers.py: 12 pure-Python
+      round-trip tests (no DB needed) — DeliveryMapper (all fields, all SemanticStatus
+      values, None fields), DeliveryEventMapper, StatusHistoryMapper (null-previous
+      and with-previous), PollLogMapper (all PollOutcome values). All pass. tests/integration/test_parcel_client.py:
+      7 tests using respx HTTP mock — successful response parsed, 429 raises ParcelRateLimitError,
+      401 raises ParcelAuthError, 503 retries exhausted then raises (AsyncMock for
+      asyncio.sleep), empty list valid, API key not in logs, Unix epoch→UTC datetime
+      conversion. tests/integration/test_repositories.py: 5 DB integration tests written
+      (snapshot 3 entries, deduplication ON CONFLICT DO NOTHING, NULL-last sort, SQL
+      injection harmless, token_version atomic increment) — require TEST_DATABASE_URL
+      to run.'
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
     lessons_learned: []
     active: false
@@ -2113,7 +2606,7 @@ tasks:
       to substitute mock use cases. Test the JWT 6-step validation chain exhaustively,
       security headers on all responses, and rate limiter behaviour.
     priority: medium
-    completed: false
+    completed: true
     parent_id: orient-dynasty
     context: "Architecture ref: ARCH-PRESENTATION §9. Requirements: SEC-REQ-015–016,\
       \ API-REQ-005, API-REQ-021–023, API-REQ-025.\n\nBase fixture pattern:\n  @pytest.fixture\n\
@@ -2147,13 +2640,73 @@ tasks:
     child_tasks: []
     created_at: '2026-04-01T12:54:28.133102'
     updated_at: '2026-04-01T12:54:28.133108'
-    completed_at: null
-    completion_report: null
-    completion_signoff_by: null
+    completed_at: '2026-04-01T15:50:47.544556'
+    completion_report: 'Completed. 32 tests passing in tests/integration/presentation/.
+      test_auth_routes.py: login success sets httpOnly + samesite=strict cookie, wrong-password
+      and unknown-user return identical 401 body (API-REQ-006), rate limit after 10
+      failures returns 429 with Retry-After, stale token_version refresh returns 401,
+      logout returns 204 and clears cookie, logout calls increment_token_version,
+      refresh token as access token rejected. test_delivery_routes.py: auth required
+      (401 without token), paginated list returns correct shape, page-beyond-total
+      returns empty not 404 (API-REQ-028), lifecycle_group present in response (NORM-REQ-004),
+      404 for missing delivery, 422 for invalid UUID. test_middleware.py: all responses
+      have X-Content-Type-Options/X-Frame-Options/Referrer-Policy, no server header
+      (SEC-REQ-034), /api/docs returns 200 in development and 404 in production (API-REQ-023),
+      500 returns standard envelope not stacktrace (API-REQ-025), 422 returns standard
+      envelope (API-REQ-005). test_jwt.py: all 6 JWT validation steps fail with identical
+      UNAUTHORIZED code and message (SEC-REQ-015-016). Bonus fixes: SecurityHeadersMiddleware
+      rewritten as pure ASGI middleware (was BaseHTTPMiddleware bypassing exception
+      handlers), dependencies.py AbstractUserRepository import fixed.'
+    completion_signoff_by: Edward Hallam
     requires_completion_signoff: 'true'
-    lessons_learned: []
+    lessons_learned:
+    - veteran
+    - normal
     active: false
-lessons_learned: []
+lessons_learned:
+- id: burma
+  lesson: TIMESTAMPTZ is not exported from sqlalchemy.dialects.postgresql in SQLAlchemy
+    2.0. Use TIMESTAMP(timezone=True) (imported from sqlalchemy) instead. The PostgreSQL
+    DDL output is identical — both produce TIMESTAMPTZ columns — but only the latter
+    is valid in code.
+  learned_task_id: domino-senior
+  created_at: '2026-04-01T14:31:31.691632'
+- id: vital
+  lesson: pydantic-settings evaluates field annotations at runtime via get_type_hints().
+    The str | None union syntax (Python 3.10+) must be replaced with Optional[str]
+    and from __future__ import annotations added to config.py for the code to work
+    with any Python 3.9 tooling (local dev, CI pre-Docker). The Docker image runs
+    Python 3.12 where str | None is valid, but local test runs will fail without this
+    fix.
+  learned_task_id: system-gyro
+  created_at: '2026-04-01T14:31:31.758620'
+- id: veteran
+  lesson: Starlette's BaseHTTPMiddleware in versions ≥0.29 bypasses exception handlers
+    registered via add_exception_handler(Exception, ...) because it propagates route
+    exceptions past ExceptionMiddleware. Pure ASGI middleware (implementing __call__(scope,
+    receive, send) directly) should be used for security headers and similar cross-cutting
+    concerns. The security_headers.py middleware was rewritten from BaseHTTPMiddleware
+    to pure ASGI to fix this.
+  learned_task_id: rose-marble
+  created_at: '2026-04-01T15:50:54.988507'
+- id: mobile
+  lesson: passlib[bcrypt] 1.7.4 is incompatible with bcrypt ≥4.0 — passlib's detect_wrap_bug()
+    tries to hash a >72-byte string which newer bcrypt rejects with ValueError. Auth
+    unit tests must mock passlib.hash.bcrypt.verify and _dummy_hash rather than computing
+    real hashes. This is an environment-level compatibility issue; when the Dockerfile
+    runs Python 3.12 with pinned deps it may not occur, but tests running locally
+    on Python 3.9 with system bcrypt will hit it.
+  learned_task_id: gondola-viva
+  created_at: '2026-04-01T15:51:02.938078'
+- id: normal
+  lesson: httpx ASGITransport does NOT run the FastAPI lifespan startup sequence.
+    Any app.state attributes set in the lifespan (carrier_cache, polling_scheduler)
+    are not available during tests. The correct pattern is to override get_carrier_cache
+    and get_scheduler_state via app.dependency_overrides, not to set app.state directly.
+    The presentation test conftest now sets these overrides automatically in the client
+    fixture.
+  learned_task_id: rose-marble
+  created_at: '2026-04-01T15:51:11.954974'
 root_tasks:
 - rufus-brother
 - gabriel-motif
@@ -2164,5 +2717,5 @@ root_tasks:
 - lexicon-think
 - orient-dynasty
 created_at: '2026-04-01T12:41:06.783684'
-updated_at: '2026-04-01T12:54:28.133116'
-current_task_id: null
+updated_at: '2026-04-01T15:51:11.954986'
+current_task_id: brave-cipher

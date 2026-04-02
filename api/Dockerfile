@@ -34,5 +34,7 @@ RUN addgroup --system appgroup && \
 
 USER appuser
 
+EXPOSE 8000
+
 # DEPLOY-REQ-010: Shell script entrypoint
 ENTRYPOINT ["./entrypoint.sh"]
