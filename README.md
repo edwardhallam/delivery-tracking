@@ -1,8 +1,10 @@
 # Delivery Tracker
 
-A self-hosted web dashboard for tracking parcels via the [Parcel App](https://parcelapp.net) API. Consolidates all your deliveries into a single view with persistent history, normalised statuses, and automatic background polling.
+A self-hosted web dashboard for tracking deliveries. Consolidates all your deliveries into a single view with persistent history, normalised statuses, and automatic background polling.
 
 ![Delivery List](docs/screenshots/delivery-list.png)
+
+> **Note:** The current MVP uses the [Parcel App](https://parcelapp.net) API as its data source. Future versions will add direct API connections to all major delivery providers (UPS, USPS, FedEx, DHL, Royal Mail, etc.).
 
 ## What it does
 
