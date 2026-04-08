@@ -41,6 +41,8 @@ from app.presentation.schemas.auth_schemas import (
     ErrorResponse,
     LoginRequest,
     LoginResponse,
+    UserInfoResponse,
+    UserInfoSchema,
 )
 from app.domain.entities.user import User
 
@@ -273,3 +275,33 @@ async def logout(
 
     logger.info("Logout: username=%s", current_user.username)
     return response
+
+
+# ---------------------------------------------------------------------------
+# GET /me
+# ---------------------------------------------------------------------------
+
+
+@router.get(
+    "/me",
+    response_model=UserInfoResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get current user info",
+    responses={
+        401: {"model": ErrorResponse, "description": "Not authenticated"},
+    },
+)
+async def get_me(
+    current_user: User = Depends(get_current_user),
+) -> UserInfoResponse:
+    """Return the current authenticated user's info.
+
+    The ``is_demo`` field is ``True`` when the user is the demo account.
+    Used by the frontend to render the demo mode banner (DEL-9).
+    """
+    return UserInfoResponse(
+        data=UserInfoSchema(
+            username=current_user.username,
+            is_demo=current_user.username == "demo",
+        )
+    )

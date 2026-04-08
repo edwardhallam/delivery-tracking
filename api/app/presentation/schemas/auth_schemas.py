@@ -74,3 +74,21 @@ class ErrorResponse(BaseModel):
     """Standard error envelope used by every error response in the API."""
 
     error: ErrorBody
+
+
+# ---------------------------------------------------------------------------
+# User info response (GET /api/auth/me)
+# ---------------------------------------------------------------------------
+
+
+class UserInfoSchema(BaseModel):
+    """Current user info returned by GET /api/auth/me."""
+
+    username: str
+    is_demo: bool
+
+
+class UserInfoResponse(BaseModel):
+    """Envelope wrapping user info (API-REQ-005)."""
+
+    data: UserInfoSchema
