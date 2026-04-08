@@ -25,6 +25,11 @@ export interface LoginCredentials {
   password: string;
 }
 
+export interface UserInfo {
+  username: string;
+  is_demo: boolean;
+}
+
 // ── Deliveries ──────────────────────────────────────────────────────────────
 
 export type LifecycleGroup = "ACTIVE" | "ATTENTION" | "TERMINAL";
