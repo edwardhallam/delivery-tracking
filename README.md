@@ -1,6 +1,6 @@
-# Delivery Tracker
+# Day1
 
-A self-hosted web dashboard for tracking deliveries. Consolidates all your deliveries into a single view with persistent history, normalised statuses, and automatic background polling.
+A delivery tracking dashboard built in one day.
 
 ![Delivery List](docs/screenshots/delivery-list.png)
 
@@ -15,6 +15,7 @@ A self-hosted web dashboard for tracking deliveries. Consolidates all your deliv
 | **Status normalisation** | Translates Parcel's integer status codes into semantic, human-readable states |
 | **Web dashboard** | Delivery list with filtering, search, sorting, and detail views |
 | **Single-user auth** | JWT-based authentication with instant session invalidation |
+| **Demo mode** | Built-in demo account with fixture data for showcasing |
 | **Docker deployment** | Single `docker compose up -d` to run the full stack |
 
 ## Screenshots
@@ -66,7 +67,6 @@ Clean Architecture with strict dependency rules:
 ### Prerequisites
 
 - Docker and Docker Compose v2
-- A Parcel App API key ([generate one here](https://web.parcelapp.net))
 
 ### 1. Clone and configure
 
@@ -76,9 +76,21 @@ cd delivery-tracking
 cp .env.example .env
 ```
 
-Edit `.env` and fill in the required values:
+Edit `.env` and configure for your preferred mode:
+
+#### Demo mode (no API key required)
 
 ```env
+DEMO_MODE=true
+POSTGRES_PASSWORD=<choose-a-strong-password>
+DATABASE_URL=postgresql+psycopg://delivery_user:<your-password>@postgres:5432/delivery_tracker
+JWT_SECRET_KEY=<generate-with: python3 -c "import secrets; print(secrets.token_hex(32))">
+```
+
+#### Live mode (real delivery tracking)
+
+```env
+DEMO_MODE=false
 POSTGRES_PASSWORD=<choose-a-strong-password>
 DATABASE_URL=postgresql+psycopg://delivery_user:<your-password>@postgres:5432/delivery_tracker
 PARCEL_API_KEY=<your-parcel-api-key>
@@ -102,11 +114,11 @@ This will:
 
 ### 3. Access
 
-Open **http://localhost** (or the port set in `FRONTEND_HTTP_PORT`) and log in with your admin credentials.
+Open **http://localhost** (or the port set in `FRONTEND_HTTP_PORT`) and log in.
 
-The first poll cycle runs immediately on startup. Your deliveries should appear within a few seconds.
+In demo mode, fixture data is available immediately. In live mode, the first poll cycle runs on startup and your deliveries should appear within a few seconds.
 
-### 4. Post-setup
+### 4. Post-setup (live mode only)
 
 Remove `ADMIN_PASSWORD` from `.env` after the first successful start to prevent credential exposure on subsequent restarts.
 
@@ -117,7 +129,8 @@ All configuration is via environment variables in `.env`. See [`.env.example`](.
 | Variable | Required | Default | Description |
 |----------|:--------:|---------|-------------|
 | `POSTGRES_PASSWORD` | Yes | | Database password |
-| `PARCEL_API_KEY` | Yes | | Parcel App API key |
+| `DEMO_MODE` | No | `false` | Enable demo mode with fixture data |
+| `PARCEL_API_KEY` | Live mode | | Parcel App API key |
 | `JWT_SECRET_KEY` | Yes | | JWT signing key (min 32 chars) |
 | `ADMIN_USERNAME` | First run | `admin` | Initial admin username |
 | `ADMIN_PASSWORD` | First run | | Initial admin password (min 12 chars) |
@@ -135,6 +148,7 @@ When `ENVIRONMENT=development`, interactive API docs are available at `/api/docs
 | `POST` | `/api/auth/login` | No | Authenticate, receive JWT |
 | `POST` | `/api/auth/refresh` | Cookie | Refresh access token |
 | `POST` | `/api/auth/logout` | Yes | Invalidate all tokens |
+| `GET` | `/api/auth/me` | Yes | Current user info (demo flag) |
 | `GET` | `/api/deliveries/` | Yes | Filtered, paginated delivery list |
 | `GET` | `/api/deliveries/{id}` | Yes | Full delivery detail with events |
 | `GET` | `/api/health` | No | Service health check |
