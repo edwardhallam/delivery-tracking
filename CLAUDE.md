@@ -137,6 +137,6 @@ Follow the inward-to-outward sequence. Each phase should be a separate Claude Co
 | Stack Path | `/opt/stacks/delivery-tracking/` |
 | SSH | `ssh oci-edwardhallam-com-admin` |
 | Deploy | `ssh oci-edwardhallam-com-admin "cd /opt/stacks/delivery-tracking && docker compose build && docker compose up -d --force-recreate"` |
-| CF Tunnel | `oci-edwardhallam-com` (route: deliveries.edwardhallam.com) |
+| CF Tunnel | `oci-edwardhallam-com` (route: day1.edwardhallam.com) |
 | Logs | `ssh oci-edwardhallam-com-admin "docker logs delivery-tracking-api-1"` |
 | Frontend Port | 8080 (host) → 80 (container) |

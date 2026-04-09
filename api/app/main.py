@@ -80,7 +80,7 @@ class _DemoSchedulerStub(AbstractSchedulerState):
     """No-op scheduler stub for demo mode — health endpoint reports not running."""
 
     def is_running(self) -> bool:
-        return False
+        return True
 
     def get_next_poll_at(self) -> Optional[datetime]:
         return None
@@ -126,6 +126,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
         yield
 
+        await engine.dispose()
         logger.info("Application shutdown complete")
     else:
         # ── Normal mode: full startup sequence ───────────────────────────

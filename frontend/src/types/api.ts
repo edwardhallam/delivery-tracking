@@ -43,7 +43,7 @@ export type SemanticStatus =
   | "DELIVERY_FAILED"
   | "EXCEPTION"
   | "NOT_FOUND"
-  | "STALLED"
+  | "FROZEN"
   | "UNKNOWN";
 
 export interface DeliverySummary {

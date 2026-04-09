@@ -10,7 +10,7 @@ const STATUS_DISPLAY: Record<SemanticStatus, string> = {
   DELIVERY_FAILED: "Delivery Failed",
   EXCEPTION: "Exception",
   NOT_FOUND: "Not Found",
-  STALLED: "Stalled",
+  FROZEN: "Frozen",
   UNKNOWN: "Unknown",
 };
 
@@ -45,7 +45,7 @@ export default function StatusBadge({
 
   // Frozen / stalled fall under TERMINAL group but should look grey
   const isFrozen =
-    semanticStatus === "STALLED" || semanticStatus === "UNKNOWN";
+    semanticStatus === "FROZEN" || semanticStatus === "UNKNOWN";
   const style = isFrozen
     ? { bg: "bg-secondary-bg", text: "text-text-secondary", dot: "bg-text-secondary" as const }
     : styles[lifecycleGroup];

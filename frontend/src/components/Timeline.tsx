@@ -10,7 +10,7 @@ const STATUS_LABELS: Record<SemanticStatus, string> = {
   DELIVERY_FAILED: "Delivery Failed",
   EXCEPTION: "Exception",
   NOT_FOUND: "Not Found",
-  STALLED: "Stalled",
+  FROZEN: "Frozen",
   UNKNOWN: "Unknown",
 };
 
