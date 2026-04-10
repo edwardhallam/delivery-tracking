@@ -7,7 +7,16 @@ import { formatRelativeTime } from "@/utils/dates";
 function DemoBanner() {
   return (
     <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center text-sm text-amber-800">
-      Demo Mode — APIs are not active.
+      Demo Mode — Functional APIs are not active. Learn more about the tech stack{" "}
+      <a
+        href="https://github.com/edwardhallam/day1"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="underline font-medium hover:text-amber-900"
+      >
+        here
+      </a>
+      .
     </div>
   );
 }

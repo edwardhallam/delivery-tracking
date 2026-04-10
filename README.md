@@ -1,6 +1,6 @@
 # Day1
 
-A delivery tracking dashboard built in one day.
+A proof of concept delivery tracking dashboard to see what can be accomplished within one day of development work. AI development was completed without any parallelization. Disclosure: Demo Mode was added during a follow-up session.
 
 ![Delivery List](docs/screenshots/delivery-list.png)
 
