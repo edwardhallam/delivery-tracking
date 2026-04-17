@@ -5,7 +5,7 @@
 services:
 
   postgres:
-    image: postgres:16.3-alpine
+    image: postgres:16.13-alpine@sha256:93d55776e04376e19adb2733e3ccebb4392ee7dd86d8ff238503b30fe719c84f
     restart: unless-stopped
     volumes:
       - postgres_data:/var/lib/postgresql/data  # DEPLOY-REQ-015
